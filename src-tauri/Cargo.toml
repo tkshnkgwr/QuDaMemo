@@ -1,0 +1,29 @@
+[package]
+name = "QuDaMemo"
+version = "0.1.0"
+description = "Lightweight Daily Markdown Note Application"
+authors = ["you"]
+edition = "2021"
+
+[lib]
+name = "quda_memo_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.0.0", features = [] }
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+log = "0.4"
+tauri = { version = "2.0.0", features = [] }
+tauri-plugin-dialog = "2"
+tauri-plugin-fs = "2"
+tauri-plugin-http = "2"
+
+[profile.release]
+opt-level = 'z'     # サイズ最適化
+lto = true          # リンク時最適化
+codegen-units = 1   # コンパイル単位を1にして最適化を最大化
+panic = 'abort'     # パニック時の巻き戻しを無効化して軽量化
+strip = true        # シンボル情報を削除（サイズ大幅削減）
