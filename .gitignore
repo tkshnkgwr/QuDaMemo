@@ -11,6 +11,9 @@ dist/
 .vite/
 .eslintcache
 
+# ===== Generated Documentation =====
+docs/typedoc/
+
 # ===== App User Data & Logs (Local Only) =====
 config.json
 qudamemo_config.json
