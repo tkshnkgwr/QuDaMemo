@@ -8,6 +8,7 @@ import {
   Calendar as CalendarIcon,
   Sparkles,
   Plus,
+  FileText,
 } from 'lucide-react';
 
 interface CalendarViewProps {
@@ -394,7 +395,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                               {cell.memo.filename}
                             </span>
                           </div>
-                          <p className="text-xs text-slate-800 dark:text-slate-100 leading-relaxed font-medium">
+                          <p className="text-xs text-slate-800 dark:text-slate-100 leading-relaxed font-medium line-clamp-3">
                             <HighlightText
                               text={cell.memo.aiSummary}
                               highlight={filter.keyword}
@@ -522,11 +523,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                           </p>
                         </div>
                       ) : (
-                        <div className="flex-1 flex flex-col items-center justify-center opacity-60 group-hover:opacity-100 py-2 transition">
-                          <span className="inline-flex items-center gap-1 text-xs text-slate-400 group-hover:text-sky-500 font-medium bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700">
-                            <Plus className="w-3 h-3" />
-                            メモを作成
-                          </span>
+                        <div className="flex-1 flex items-center justify-center py-2 transition opacity-40 group-hover:opacity-100">
+                          <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 group-hover:text-sky-500 group-hover:border-sky-300 dark:group-hover:border-sky-600 transition shadow-2xs">
+                            <Plus className="w-3.5 h-3.5" />
+                          </div>
                         </div>
                       )}
                     </div>
@@ -580,13 +580,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 <span className="font-mono font-semibold text-slate-300">
                   {hoveredCell.memo.filename}
                 </span>
-                <span className="flex items-center gap-1 text-amber-400">
-                  <Sparkles className="w-3 h-3" />
-                  AI要約
-                </span>
+                <span className="text-slate-400 text-[10px]">メモ本文プレビュー</span>
               </div>
-              <p className="text-slate-200 text-xs leading-relaxed bg-slate-950/80 p-2 rounded-lg border border-slate-800">
-                {hoveredCell.memo.aiSummary}
+              <p className="text-slate-200 text-xs leading-relaxed bg-slate-950/80 p-2 rounded-lg border border-slate-800 font-mono line-clamp-5 whitespace-pre-wrap">
+                {hoveredCell.memo.content.trim() || '（本文なし）'}
               </p>
 
               {hoveredCell.memo.frontmatter.tags.length > 0 && (

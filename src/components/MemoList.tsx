@@ -20,6 +20,7 @@ interface MemoListProps {
   onSelectMemo: (memo: QuickMemo) => void;
   onDeleteMemo: (memoId: string) => void;
   onOpenTodayMemo: () => void;
+  summarizingMemoId?: string | null;
 }
 
 export const MemoList: React.FC<MemoListProps> = ({
@@ -28,6 +29,7 @@ export const MemoList: React.FC<MemoListProps> = ({
   onSelectMemo,
   onDeleteMemo,
   onOpenTodayMemo,
+  summarizingMemoId,
 }) => {
   // フィルター処理の適用
   const filteredMemos = memos.filter((memo) => {
@@ -67,6 +69,17 @@ export const MemoList: React.FC<MemoListProps> = ({
   return (
     <div className="flex-1 p-4 overflow-y-auto bg-slate-50/50 dark:bg-slate-950/40">
       <div className="max-w-6xl mx-auto space-y-4">
+        {/* バックグラウンド要約中全体の通知バナー */}
+        {summarizingMemoId && (
+          <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 flex items-center justify-between text-xs animate-pulse">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-amber-500 animate-spin" />
+              <span className="font-semibold">バックグラウンドで AI 要約を自動生成中です...</span>
+            </div>
+            <span className="text-[11px] font-mono text-amber-600 dark:text-amber-400">対象メモ: {summarizingMemoId}.md</span>
+          </div>
+        )}
+
         {/* 件数サマリー */}
         <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
           <span>
@@ -108,12 +121,17 @@ export const MemoList: React.FC<MemoListProps> = ({
             const weekday = memo.frontmatter.weekday;
             const holiday = memo.frontmatter.holiday;
             const filename = memo.filename;
+            const isSummarizingThis = summarizingMemoId === memo.id;
 
             return (
               <div
                 key={memo.id}
                 onClick={() => onSelectMemo(memo)}
-                className="group bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 shadow-xs hover:shadow-md hover:border-sky-300 dark:hover:border-sky-700 transition-all flex flex-col justify-between cursor-pointer relative overflow-hidden"
+                className={`group bg-white dark:bg-slate-900 rounded-xl border p-4 shadow-xs hover:shadow-md transition-all flex flex-col justify-between cursor-pointer relative overflow-hidden ${
+                  isSummarizingThis
+                    ? 'border-amber-400 dark:border-amber-600 ring-2 ring-amber-400/20'
+                    : 'border-slate-200 dark:border-slate-800 hover:border-sky-300 dark:hover:border-sky-700'
+                }`}
               >
                 {/* カードヘッダー */}
                 <div className="space-y-2">
@@ -148,15 +166,18 @@ export const MemoList: React.FC<MemoListProps> = ({
                     </div>
                   )}
 
-                  {/* AI要約セクション */}
-                  <div className="bg-slate-50 dark:bg-slate-950 p-2.5 rounded-lg border border-slate-200/60 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 space-y-1">
-                    <div className="flex items-center gap-1 text-[10px] font-semibold text-amber-600 dark:text-amber-400">
-                      <Sparkles className="w-3 h-3" />
-                      <span>要約:</span>
-                    </div>
-                    <p className="line-clamp-2 leading-relaxed text-[11px]">
-                      <HighlightText text={memo.aiSummary} highlight={filter.keyword} />
-                    </p>
+                  {/* AI要約セクション（文字・アイコン除去＆生成中表示） */}
+                  <div className="bg-slate-50 dark:bg-slate-950 p-2.5 rounded-lg border border-slate-200/60 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300">
+                    {isSummarizingThis ? (
+                      <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-semibold py-0.5 animate-pulse">
+                        <Sparkles className="w-3.5 h-3.5 animate-spin text-amber-500" />
+                        <span>AI要約生成中...</span>
+                      </div>
+                    ) : (
+                      <p className="line-clamp-2 leading-relaxed text-[11px]">
+                        <HighlightText text={memo.aiSummary} highlight={filter.keyword} />
+                      </p>
+                    )}
                   </div>
 
                   {/* 本文スニペット */}

@@ -18,6 +18,7 @@
 
 ## 2. 品質管理・検証手順
 - **コード品質チェック**:
+  - プログラムソース (`*.ts`, `*.tsx`, `*.rs`, `Cargo.toml` 等) に修正があった場合のみ以下を実行します（**※Markdown / ドキュメントのみの修正時は `cargo fmt` や `cargo check` 等を一切スキップして即座に完了**）。
   - `npm run lint`: TypeScript 型チェックエラーゼロを確認します。
   - `npm run build`: Vite フロントエンドビルドが成功することを確認します。
   - `cargo check --manifest-path src-tauri/Cargo.toml`: Tauri バックエンド Rust の正常性を確認します。
@@ -34,3 +35,12 @@
 | `SPECIFICATION.md` | 機能仕様・UI | 画面レイアウト・データ構造・ショートカット変更時 |
 | `ARCHITECTURE.md` | アーキテクチャ | システム境界・IPC通信・プロセス構造の変更時 |
 | `DEVELOPMENT.md` | 開発ガイド | ビルド手順・依存関係・開発コマンド変更時 |
+
+---
+
+## 4. バージョン管理ルール (Semantic Versioning)
+- 大賢者が修正規模に応じて自発的に `package.json`, `src-tauri/Cargo.toml`, `src-tauri/tauri.conf.json` のバージョン番号を統一更新し、`CHANGELOG.md` を同期記録します。
+  - **MAJOR (x.0.0)**: 破壊的変更・大規模型再設計
+  - **MINOR (0.x.0)**: 新機能・大基盤/ライブラリ導入
+  - **PATCH (0.0.x)**: バグ修正・細かな調整
+

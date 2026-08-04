@@ -16,6 +16,7 @@ import { MemoList } from './components/MemoList';
 import { CalendarView } from './components/CalendarView';
 import { MemoEditor } from './components/MemoEditor';
 import { SettingsModal } from './components/SettingsModal';
+import { KeyboardShortcutsModal } from './components/KeyboardShortcutsModal';
 
 export default function App() {
   const [settings, setSettings] = useState<AppSettings>(loadAppSettings);
@@ -25,6 +26,8 @@ export default function App() {
   const [viewMode, setViewMode] = useState<ActiveViewMode>('list'); // 初期起動時はリストビュー
   const [activeMemo, setActiveMemo] = useState<QuickMemo | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [showShortcutsModal, setShowShortcutsModal] = useState(false);
+  const [summarizingMemoId, setSummarizingMemoId] = useState<string | null>(null);
 
   // 検索フィルターの状態
   const [filter, setFilter] = useState<SearchFilter>({
@@ -32,6 +35,54 @@ export default function App() {
     tag: '',
     dateRange: { start: '', end: '' },
   });
+
+  // グローバルショートカットキーリスナー (F1 / Ctrl+? / Cmd+? / Ctrl+, 等)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // F1 キーでショートカットヘルプ表示
+      if (e.key === 'F1') {
+        e.preventDefault();
+        setShowShortcutsModal((prev) => !prev);
+        return;
+      }
+
+      // Ctrl + ? / Cmd + ? でショートカットヘルプ表示
+      if ((e.ctrlKey || e.metaKey) && e.key === '?') {
+        e.preventDefault();
+        setShowShortcutsModal((prev) => !prev);
+        return;
+      }
+
+      // Esc キーでモーダルを閉じる
+      if (e.key === 'Escape') {
+        if (showShortcutsModal) {
+          setShowShortcutsModal(false);
+          return;
+        }
+        if (isSettingsOpen) {
+          setIsSettingsOpen(false);
+          return;
+        }
+      }
+
+      // Ctrl + N / Cmd + N で本日のメモを開く
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'n' || e.key === 'N')) {
+        e.preventDefault();
+        handleOpenTodayMemo();
+        return;
+      }
+
+      // Ctrl + , / Cmd + , で設定モーダルを開く
+      if ((e.ctrlKey || e.metaKey) && e.key === ',') {
+        e.preventDefault();
+        setIsSettingsOpen(true);
+        return;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showShortcutsModal, isSettingsOpen, memos]);
 
   // 起動時にローカル保存先フォルダ(storagePath)から物理.mdファイルをロード
   useEffect(() => {
@@ -159,6 +210,14 @@ export default function App() {
               setActiveMemo(null);
               setViewMode('list'); // 閉じた際にリストビューへ戻る
             }}
+            onStartBackgroundSummary={(memoId) => setSummarizingMemoId(memoId)}
+            onFinishBackgroundSummary={() => {
+              setSummarizingMemoId(null);
+              // ディスクから再ロードして一覧画面へ反映
+              loadAllMemosAsync(settings).then((loaded) => {
+                if (loaded) setMemos(loaded);
+              });
+            }}
           />
         ) : (
           /* Startup & Main Views: List View & 6-Row Calendar View */
@@ -169,6 +228,7 @@ export default function App() {
               filter={filter}
               onUpdateFilter={setFilter}
               onOpenTodayMemo={handleOpenTodayMemo}
+              onOpenShortcuts={() => setShowShortcutsModal(true)}
               availableTags={availableTags}
             />
 
@@ -179,6 +239,7 @@ export default function App() {
                 onSelectMemo={handleSelectMemoFromList}
                 onDeleteMemo={handleDeleteMemo}
                 onOpenTodayMemo={handleOpenTodayMemo}
+                summarizingMemoId={summarizingMemoId}
               />
             )}
 
@@ -205,6 +266,13 @@ export default function App() {
             saveAllMemos(memos, newSettings);
           }}
           onClose={() => setIsSettingsOpen(false)}
+        />
+      )}
+
+      {/* Keyboard Shortcuts Modal (キーボードショートカット確認画面) */}
+      {showShortcutsModal && (
+        <KeyboardShortcutsModal
+          onClose={() => setShowShortcutsModal(false)}
         />
       )}
     </div>

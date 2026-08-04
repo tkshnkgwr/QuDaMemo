@@ -13,5 +13,6 @@ This document contains extended development and operational guidelines for AI Ag
 
 ---
 
-## 2. Documentation Sync
+## 2. Documentation & Versioning Sync
 - Synchronize documentation in `docs/en/` and `docs/ja/` whenever architectural, feature, or structural changes occur.
+- **Versioning Protocol**: Automatically increment version numbers in `package.json`, `src-tauri/Cargo.toml`, and `src-tauri/tauri.conf.json` following Semantic Versioning (`MAJOR.MINOR.PATCH`) based on modification impact.

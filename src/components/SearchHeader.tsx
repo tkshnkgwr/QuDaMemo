@@ -1,6 +1,6 @@
 import React from 'react';
 import { ActiveViewMode, SearchFilter } from '../types';
-import { Search, List, Calendar, CalendarDays, Plus, Tag, X, Calendar as CalendarIcon, FilterX } from 'lucide-react';
+import { Search, List, Calendar, CalendarDays, Plus, Tag, X, Calendar as CalendarIcon, FilterX, HelpCircle } from 'lucide-react';
 
 interface SearchHeaderProps {
   viewMode: ActiveViewMode;
@@ -8,6 +8,7 @@ interface SearchHeaderProps {
   filter: SearchFilter;
   onUpdateFilter: (newFilter: SearchFilter) => void;
   onOpenTodayMemo: () => void;
+  onOpenShortcuts?: () => void;
   availableTags: string[];
 }
 
@@ -17,6 +18,7 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
   filter,
   onUpdateFilter,
   onOpenTodayMemo,
+  onOpenShortcuts,
   availableTags,
 }) => {
   const hasActiveFilter =
@@ -73,11 +75,21 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
           </button>
         </div>
 
-        {/* アクションボタン: 本日のメモを開く/作成 */}
+        {/* アクションボタン: 本日のメモを開く & ショートカットヘルプ */}
         <div className="flex items-center gap-2">
+          {onOpenShortcuts && (
+            <button
+              onClick={onOpenShortcuts}
+              className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-slate-200 dark:border-slate-800 flex items-center gap-1.5 text-xs font-medium cursor-pointer"
+              title="キーボードショートカット確認 (F1)"
+            >
+              <HelpCircle className="w-4 h-4 text-sky-500" />
+              <span className="hidden sm:inline">ヘルプ</span>
+            </button>
+          )}
           <button
             onClick={onOpenTodayMemo}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white font-medium text-xs shadow-xs transition-all"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white font-medium text-xs shadow-xs transition-all cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>本日のメモを開く</span>

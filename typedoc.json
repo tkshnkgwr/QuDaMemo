@@ -1,0 +1,17 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": [
+    "src/types.ts",
+    "src/utils/storage.ts",
+    "src/utils/fileStorage.ts",
+    "src/utils/frontmatter.ts",
+    "src/utils/holidays.ts",
+    "src/utils/logger.ts"
+  ],
+  "out": "docs/typedoc",
+  "readme": "README.md",
+  "name": "QuDaMemo TypeScript API Documentation",
+  "includeVersion": true,
+  "exclude": ["**/*.test.ts"],
+  "skipErrorChecking": true
+}

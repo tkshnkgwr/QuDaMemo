@@ -40,6 +40,8 @@ interface MemoEditorProps {
   settings: AppSettings;
   onSaveMemo: (updatedMemo: QuickMemo) => void;
   onCloseEditor: () => void;
+  onStartBackgroundSummary?: (memoId: string) => void;
+  onFinishBackgroundSummary?: (memoId: string) => void;
 }
 
 export const MemoEditor: React.FC<MemoEditorProps> = ({
@@ -47,6 +49,8 @@ export const MemoEditor: React.FC<MemoEditorProps> = ({
   settings,
   onSaveMemo,
   onCloseEditor,
+  onStartBackgroundSummary,
+  onFinishBackgroundSummary,
 }) => {
   const [content, setContent] = useState(memo.content);
   const [tags, setTags] = useState<string[]>(memo.frontmatter.tags || []);
@@ -335,10 +339,15 @@ export const MemoEditor: React.FC<MemoEditorProps> = ({
     // 3. テキスト変更時または要約未作成時はバックグラウンドで非同期で要約を実行
     if ((isTextChanged || hasNoSummary) && textToSave.trim()) {
       logger.info('【バックグラウンドAI要約開始】一覧画面への復帰後、非同期で要約を生成・保存します');
+      onStartBackgroundSummary?.(memo.id);
       setTimeout(() => {
-        triggerSummarization(textToSave).catch((err) => {
-          logger.error('バックグラウンドAI要約中に例外が発生しました', err);
-        });
+        triggerSummarization(textToSave)
+          .catch((err) => {
+            logger.error('バックグラウンドAI要約中に例外が発生しました', err);
+          })
+          .finally(() => {
+            onFinishBackgroundSummary?.(memo.id);
+          });
       }, 50);
     }
   };

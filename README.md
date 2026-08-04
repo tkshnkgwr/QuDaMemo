@@ -1,4 +1,4 @@
-# QuDaMemo (くだメモ / 迅メモ)
+# QuDaMemo (Quick Daily Memo)
 
 [![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](package.json)
 [![Tauri](https://img.shields.io/badge/tauri-v2-blue.svg)](https://v2.tauri.app/)
@@ -11,8 +11,8 @@
 
 **English** | [日本語版 (README_JA.md)](README_JA.md)
 
-- [Japanese Documentation (docs/ja/)](docs/ja/README.md)
-- [English Documentation (docs/en/)](docs/en/README.md)
+- [Japanese Documentation (docs/ja/)](docs/ja/SPECIFICATION.md)
+- [English Documentation (docs/en/)](docs/en/SPECIFICATION.md)
 
 ---
 
