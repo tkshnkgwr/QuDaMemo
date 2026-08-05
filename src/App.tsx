@@ -17,6 +17,8 @@ import { CalendarView } from './components/CalendarView';
 import { MemoEditor } from './components/MemoEditor';
 import { SettingsModal } from './components/SettingsModal';
 import { KeyboardShortcutsModal } from './components/KeyboardShortcutsModal';
+import { LogViewerModal } from './components/LogViewerModal';
+import { AboutModal } from './components/AboutModal';
 
 export default function App() {
   const [settings, setSettings] = useState<AppSettings>(loadAppSettings);
@@ -27,6 +29,8 @@ export default function App() {
   const [activeMemo, setActiveMemo] = useState<QuickMemo | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [showShortcutsModal, setShowShortcutsModal] = useState(false);
+  const [showLogsModal, setShowLogsModal] = useState(false);
+  const [showAboutModal, setShowAboutModal] = useState(false);
   const [summarizingMemoId, setSummarizingMemoId] = useState<string | null>(null);
 
   // 検索フィルターの状態
@@ -164,7 +168,7 @@ export default function App() {
    */
   const handleOpenTodayMemo = () => {
     const todayStr = new Date().toISOString().slice(0, 10);
-    const { memo, updatedMemos } = getOrCreateMemoForDate(todayStr, memos);
+    const { memo, updatedMemos } = getOrCreateMemoForDate(todayStr, memos, settings.fileNameRule, settings);
     setMemos(updatedMemos);
     setActiveMemo(memo);
     setViewMode('editor');
@@ -174,7 +178,7 @@ export default function App() {
    * カレンダーで選択された日付（YYYY-MM-DD）のメモを開くまたは新規作成
    */
   const handleSelectDate = (dateStr: string) => {
-    const { memo, updatedMemos } = getOrCreateMemoForDate(dateStr, memos);
+    const { memo, updatedMemos } = getOrCreateMemoForDate(dateStr, memos, settings.fileNameRule, settings);
     setMemos(updatedMemos);
     setActiveMemo(memo);
     setViewMode('editor');
@@ -195,6 +199,9 @@ export default function App() {
         settings={settings}
         onUpdateSettings={setSettings}
         onOpenSettings={() => setIsSettingsOpen(true)}
+        onOpenHelp={() => setShowShortcutsModal(true)}
+        onOpenLogs={() => setShowLogsModal(true)}
+        onOpenAbout={() => setShowAboutModal(true)}
         memoCount={memos.length}
       />
 
@@ -273,6 +280,20 @@ export default function App() {
       {showShortcutsModal && (
         <KeyboardShortcutsModal
           onClose={() => setShowShortcutsModal(false)}
+        />
+      )}
+
+      {/* App Log Viewer Modal (アプリログ閲覧画面) */}
+      {showLogsModal && (
+        <LogViewerModal
+          onClose={() => setShowLogsModal(false)}
+        />
+      )}
+
+      {/* About App Modal (アプリ情報画面) */}
+      {showAboutModal && (
+        <AboutModal
+          onClose={() => setShowAboutModal(false)}
         />
       )}
     </div>

@@ -162,6 +162,42 @@ class AppLogger {
   public getRecentLogs(): string[] {
     return [...this.memoryLogs];
   }
+
+  /**
+   * 物理ディスクのログファイル (qudamemo.log) を読み込み、取得する
+   */
+  public async readFullLogFromDisk(): Promise<string> {
+    if (this.storagePath) {
+      try {
+        const separator = this.storagePath.endsWith('\\') || this.storagePath.endsWith('/') ? '' : '\\';
+        const mainLogFile = `${this.storagePath}${separator}logs${separator}qudamemo.log`;
+        if (await exists(mainLogFile)) {
+          return await readTextFile(mainLogFile);
+        }
+      } catch (err) {
+        console.warn('Failed to read log file from disk:', err);
+      }
+    }
+    return this.memoryLogs.join('\n') || '（ログデータはありません）';
+  }
+
+  /**
+   * メモリおよび物理ディスクのログデータをクリアする
+   */
+  public async clearLogs(): Promise<void> {
+    this.memoryLogs = [];
+    if (this.storagePath) {
+      try {
+        const separator = this.storagePath.endsWith('\\') || this.storagePath.endsWith('/') ? '' : '\\';
+        const mainLogFile = `${this.storagePath}${separator}logs${separator}qudamemo.log`;
+        if (await exists(mainLogFile)) {
+          await writeTextFile(mainLogFile, `[${this.getFormattedTimestamp()}] [INFO] Logs cleared by user.\n`);
+        }
+      } catch (err) {
+        console.warn('Failed to clear log file:', err);
+      }
+    }
+  }
 }
 
 export const logger = new AppLogger();

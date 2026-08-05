@@ -555,14 +555,14 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
       {/* カーソルホバー用ツールチップ / ポップオーバー */}
       {hoveredCell && (hoveredCell.holidayName || hoveredCell.memo) && (
         <div
-          className="fixed z-50 pointer-events-none w-72 bg-slate-900 text-slate-100 rounded-xl p-3 shadow-2xl border border-slate-700 text-xs space-y-2 animate-in fade-in duration-150"
+          className="fixed z-50 pointer-events-none w-72 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-xl p-3 shadow-xl border border-slate-200 dark:border-slate-700 text-xs space-y-2 animate-in fade-in duration-150"
           style={{
             top: Math.min(hoveredCell.y + 8, window.innerHeight - 200),
             left: Math.min(hoveredCell.x + 8, window.innerWidth - 300),
           }}
         >
-          <div className="flex items-center justify-between border-b border-slate-800 pb-1.5">
-            <div className="font-mono font-bold text-sky-400 flex items-center gap-1.5">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-1.5">
+            <div className="font-mono font-bold text-sky-600 dark:text-sky-400 flex items-center gap-1.5">
               <CalendarIcon className="w-3.5 h-3.5" />
               {hoveredCell.dateStr} ({getJapaneseWeekday(hoveredCell.dateStr)})
             </div>
@@ -576,13 +576,13 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
           {hoveredCell.memo ? (
             <div className="space-y-1.5">
-              <div className="flex items-center justify-between text-[11px] text-slate-400">
-                <span className="font-mono font-semibold text-slate-300">
+              <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                <span className="font-mono font-semibold text-slate-700 dark:text-slate-300">
                   {hoveredCell.memo.filename}
                 </span>
                 <span className="text-slate-400 text-[10px]">メモ本文プレビュー</span>
               </div>
-              <p className="text-slate-200 text-xs leading-relaxed bg-slate-950/80 p-2 rounded-lg border border-slate-800 font-mono line-clamp-5 whitespace-pre-wrap">
+              <p className="text-slate-800 dark:text-slate-200 text-xs leading-relaxed bg-slate-50 dark:bg-slate-950/80 p-2 rounded-lg border border-slate-200 dark:border-slate-800 font-mono line-clamp-5 whitespace-pre-wrap">
                 {hoveredCell.memo.content.trim() || '（本文なし）'}
               </p>
 
@@ -591,7 +591,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                   {hoveredCell.memo.frontmatter.tags.map((t) => (
                     <span
                       key={t}
-                      className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 text-[10px] font-medium"
+                      className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60 text-[10px] font-medium"
                     >
                       #{t}
                     </span>
@@ -600,7 +600,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               )}
             </div>
           ) : (
-            <p className="text-slate-400 text-[11px] italic">
+            <p className="text-slate-500 dark:text-slate-400 text-[11px] italic">
               （この日のメモはまだ作成されていません。クリックして新規作成）
             </p>
           )}

@@ -11,6 +11,9 @@
     "core:window:allow-close",
     "dialog:default",
     "fs:default",
-    "http:default"
+    "fs:read-all",
+    "fs:write-all",
+    "http:default",
+    "window-state:default"
   ]
 }

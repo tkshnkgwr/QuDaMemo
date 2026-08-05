@@ -1,8 +1,10 @@
 import React, { useState, useRef } from 'react';
 import { AppSettings } from '../types';
 import { pickDirectory, exportFileWithDialog } from '../utils/dialog';
+import { clearLocalStorageCache } from '../utils/storage';
 import { logger } from '../utils/logger';
 import { fetch as tauriFetch } from '@tauri-apps/plugin-http';
+import { version } from '../../package.json';
 import {
   Settings,
   Folder,
@@ -28,6 +30,8 @@ import {
   Globe,
   Sliders,
   FileText,
+  Trash2,
+  Database,
 } from 'lucide-react';
 
 async function safeFetch(url: string, options?: RequestInit): Promise<Response> {
@@ -321,7 +325,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden text-slate-900 dark:text-slate-100 animate-in fade-in zoom-in-95 duration-150">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl w-full max-w-4xl h-[580px] max-h-[90vh] flex flex-col overflow-hidden text-slate-900 dark:text-slate-100 animate-in fade-in duration-150">
         {/* Modal Header */}
         <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-950/50 shrink-0">
           <div className="flex items-center gap-2.5">
@@ -910,6 +914,52 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   )}
                 </div>
 
+                {/* LocalStorage キャッシュ管理 ＆ 格納先情報 */}
+                <div className="p-4 rounded-2xl bg-amber-50/50 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-800/40 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Database className="w-5 h-5 text-amber-500" />
+                      <div>
+                        <div className="font-bold text-xs text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                          <span>LocalStorage 高速キャッシュ管理</span>
+                          <span className="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300 text-[10px] font-bold">
+                            一時キャッシュ（最大365件）
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                          UI表示の爆速化のためにブラウザ内ストレージへ一時保存されているキャッシュデータ
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (confirm('LocalStorageの一時キャッシュを消去しますか？\n（指定ローカル保存先の物理.mdファイルは削除されず安全に保護されます）')) {
+                          clearLocalStorageCache();
+                          setStatusMessage('LocalStorageキャッシュを消去しました。再起動時に物理ファイルから再ロードされます。');
+                          setTimeout(() => setStatusMessage(null), 4000);
+                        }
+                      }}
+                      className="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 font-bold text-xs flex items-center gap-1.5 transition-colors border border-rose-500/20 cursor-pointer shrink-0"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>キャッシュ全消去</span>
+                    </button>
+                  </div>
+
+                  <div className="space-y-1 pt-1 border-t border-amber-200/40 dark:border-amber-800/30 text-[11px]">
+                    <div className="font-bold text-slate-700 dark:text-slate-300">
+                      📍 LocalStorage 物理格納先パス（WebView2 データフォルダ）:
+                    </div>
+                    <div className="font-mono text-[10px] bg-white/80 dark:bg-slate-900/80 p-2 rounded-lg border border-amber-200/40 dark:border-amber-800/40 text-slate-600 dark:text-slate-400 break-all select-all">
+                      %LOCALAPPDATA%\com.qudamemo.app\EBWebView\Default\Local Storage\leveldb
+                    </div>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                      ※ メモの本体データは「全般」タブで設定された【ローカル保存先フォルダ】に `.md` 実ファイルとして永久保存されます。
+                    </p>
+                  </div>
+                </div>
+
                 {/* Google Drive 連動枠 */}
                 <div className="p-4 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/30 border border-indigo-200/60 dark:border-indigo-800/40 space-y-2">
                   <div className="flex items-center justify-between">
@@ -945,7 +995,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         {/* Modal Footer */}
         <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 flex items-center justify-between shrink-0">
           <p className="text-[11px] text-slate-400">
-            QuDaMemo v0.1.0 • Settings Auto-Sync
+            QuDaMemo v{version} • Settings Auto-Sync
           </p>
           <div className="flex items-center gap-3">
             <button

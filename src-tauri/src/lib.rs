@@ -15,19 +15,24 @@ use std::path::Path;
 #[derive(Debug, Serialize, Deserialize, Clone, Type, PartialEq, Eq)]
 pub struct FrontmatterDto {
     /// メモのタイトル
-    pub title: String,
+    #[serde(default)]
+    pub title: Option<String>,
     /// 日付 (YYYY-MM-DD)
     pub date: String,
     /// 曜日 (月, 火, 水...)
+    #[serde(default)]
     pub weekday: String,
     /// 祝日名（祝日でない場合は None）
+    #[serde(default)]
     pub holiday: Option<String>,
     /// AI要約テキスト
+    #[serde(default)]
     pub summary: Option<String>,
     /// タグ一覧
+    #[serde(default)]
     pub tags: Vec<String>,
     /// 最終更新日時
-    #[serde(rename = "updatedAt")]
+    #[serde(default, rename = "updatedAt")]
     pub updated_at: Option<String>,
 }
 
@@ -127,7 +132,7 @@ pub fn parse_markdown_to_memo(file_path: &Path, raw: &str) -> Option<QuickMemoDt
         raw_markdown: raw.to_string(),
         ai_summary: summary.clone(),
         frontmatter: FrontmatterDto {
-            title,
+            title: Some(title),
             date: formatted_date,
             weekday,
             holiday,
@@ -190,6 +195,15 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_http::init())
+        .plugin(tauri_plugin_window_state::Builder::default().build())
+        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            use tauri::Manager;
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.show();
+                let _ = window.unminimize();
+                let _ = window.set_focus();
+            }
+        }))
         .invoke_handler(tauri::generate_handler![
             commands::load_all_memos,
             commands::save_memo_file,
@@ -229,7 +243,7 @@ updatedAt: "2026-08-04T12:00:00Z"
         assert_eq!(memo.date, "2026-08-04");
         assert_eq!(memo.filename, "20260804.md");
         assert_eq!(memo.ai_summary, "これは要約テストです");
-        assert_eq!(memo.frontmatter.title, "テストメモ");
+        assert_eq!(memo.frontmatter.title, Some("テストメモ".to_string()));
         assert_eq!(memo.frontmatter.tags, vec!["Rust", "Tauri"]);
         assert!(memo.content.contains("今日のメモ本文"));
     }
@@ -254,7 +268,7 @@ updatedAt: "2026-08-04T12:00:00Z"
             raw_markdown: "---\ntitle: \"20260804\"\n---\n本文コンテンツ".to_string(),
             ai_summary: "要約テキスト".to_string(),
             frontmatter: FrontmatterDto {
-                title: "20260804".to_string(),
+                title: Some("20260804".to_string()),
                 date: "2026-08-04".to_string(),
                 weekday: "火".to_string(),
                 holiday: None,

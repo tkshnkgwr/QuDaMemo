@@ -1,6 +1,6 @@
 [package]
 name = "QuDaMemo"
-version = "1.0.0"
+version = "1.0.3"
 description = "Lightweight Daily Markdown Note Application"
 authors = ["you"]
 edition = "2021"
@@ -20,6 +20,8 @@ tauri = { version = "2.0.0", features = [] }
 tauri-plugin-dialog = "2"
 tauri-plugin-fs = "2"
 tauri-plugin-http = "2"
+tauri-plugin-single-instance = "2"
+tauri-plugin-window-state = "2"
 specta = { version = "2.0.0-rc.25", features = ["derive"] }
 specta-typescript = "0.0.12"
 tauri-specta = { version = "2.0.0-rc.20", features = ["typescript"] }

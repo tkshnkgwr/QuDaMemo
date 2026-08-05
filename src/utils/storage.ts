@@ -201,15 +201,19 @@ export function loadAllMemos(): QuickMemo[] {
 
 /**
  * メモ一覧をlocalStorageおよび物理ディスクの両方に保存・非同期同期する
+ * LocalStorage は一時キャッシュとして動作し、直近365件にトリムして肥大化を防ぐ
  */
 export function saveAllMemos(memos: QuickMemo[], settings?: AppSettings): void {
   try {
-    localStorage.setItem(STORAGE_KEY_NOTES, JSON.stringify(memos));
+    // 直近365件のみLocalStorageキャッシュに保持（日付降順でトリム）
+    const sortedMemos = [...memos].sort((a, b) => b.date.localeCompare(a.date));
+    const cachedMemos = sortedMemos.slice(0, 365);
+    localStorage.setItem(STORAGE_KEY_NOTES, JSON.stringify(cachedMemos));
   } catch (e) {
-    console.error('メモの保存に失敗しました:', e);
+    console.error('メモのLocalStorageキャッシュ保存に失敗しました:', e);
   }
 
-  // 設定されたローカルフォルダへ全ファイルをバックグラウンド保存同期
+  // 設定されたローカルフォルダへ全ファイルをバックグラウンド保存同期（ディスクには全件保存）
   if (settings?.storagePath) {
     memos.forEach((memo) => {
       writeMemoToDisk(settings.storagePath, memo, settings.fileNameRule).catch((err) =>
@@ -298,9 +302,9 @@ export function formatMemoFilename(dateStr: string, fileNameRule?: string): stri
 }
 
 /**
- * 指定した日付（YYYY-MM-DD）のメモを取得または新規作成する（設定されたファイル名ルールを適用）
+ * 指定した日付（YYYY-MM-DD）のメモを取得または新規作成する（設定されたファイル名ルールを適用し物理ディスクへ保存）
  */
-export function getOrCreateMemoForDate(dateStr: string, memos: QuickMemo[], fileNameRule?: string): {
+export function getOrCreateMemoForDate(dateStr: string, memos: QuickMemo[], fileNameRule?: string, settings?: AppSettings): {
   memo: QuickMemo;
   updatedMemos: QuickMemo[];
   isNew: boolean;
@@ -341,8 +345,20 @@ export function getOrCreateMemoForDate(dateStr: string, memos: QuickMemo[], file
   };
 
   const newMemosList = [newMemo, ...memos];
-  saveAllMemos(newMemosList);
+  saveAllMemos(newMemosList, settings);
   return { memo: newMemo, updatedMemos: newMemosList, isNew: true };
+}
+
+/**
+ * LocalStorageキャッシュを完全にクリアする（全物理ファイルはディスク上に保護されます）
+ */
+export function clearLocalStorageCache(): void {
+  try {
+    localStorage.removeItem(STORAGE_KEY_NOTES);
+    localStorage.removeItem('quickmemo_notes_v1');
+  } catch (e) {
+    console.error('LocalStorageキャッシュの消去に失敗しました:', e);
+  }
 }
 
 /**

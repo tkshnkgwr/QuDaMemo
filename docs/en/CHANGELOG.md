@@ -4,6 +4,50 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.3] - 2026-08-05
+
+### Added & Improved
+- **QuMaEditor-Compliant List-Style Theme Dropdown Menu**:
+  - Replaced theme toggle button with a list dropdown menu (Light / Dark / System) with active checkmark indicators.
+- **QuMaEditor-Compliant List-Style Help Dropdown Menu**:
+  - Replaced Help button with a dropdown menu listing "Keyboard Shortcuts (F1)", "View App Logs", and "About QuDaMemo (v1.0.3)".
+- **Application Log Viewer Modal (`LogViewerModal`)**:
+  - Added full log viewer modal allowing real-time inspection, copying, refreshing, and clearing of `qudamemo.log`.
+- **About App Modal (`AboutModal`)**:
+  - Added About dialog displaying dynamic app version (`v1.0.3`), tech stack details, and credits.
+
+---
+
+## [1.0.2] - 2026-08-05
+
+### Added & Improved
+- **Prevent Multiple Instances (Single Instance)**:
+  - Integrated `tauri-plugin-single-instance` to prevent duplicate app launches. Re-opening focuses the existing window.
+- **Auto Memory & Restoration of Window Position/Size**:
+  - Integrated `tauri-plugin-window-state` to automatically remember and restore last window bounds (X, Y, Width, Height, Maximized state).
+- **Streamlined TitleBar UI with Dynamic Versioning**:
+  - Dynamically displays app version from `package.json` (`v1.0.2`).
+  - Removed "Rust Engine" badge, storage path indicator, and Pos text for a clean UI.
+  - Added Help button (HelpCircle) based on QuMaEditor specs (opens keyboard shortcuts modal).
+- **Fixed SettingsModal Tab Switching Jitter**:
+  - Fixed modal height to `h-[580px]` to eliminate layout shifts when switching tabs.
+
+---
+
+## [1.0.1] - 2026-08-05
+
+### Fixed
+- **Root Fix for Physical `.md` File Saving Error**:
+  - Added `#[serde(default)]` and `Option` to Rust `FrontmatterDto` fields (such as `title`) to fix JSON deserialization type mismatch when invoking Rust save commands.
+  - Expanded `fs` permissions in `capabilities/default.json` to allow full filesystem write/read capabilities to user-configured directories.
+  - Passed `settings` context to `getOrCreateMemoForDate` to ensure new memos are saved to physical disk immediately.
+- **LocalStorage Cache Management & Overflow Protection**:
+  - Implemented automatic trimming of LocalStorage cache to a maximum of 365 items to prevent browser storage bloat.
+  - Added physical storage path display for LocalStorage (`%LOCALAPPDATA%\...`) in Settings > Other.
+  - Added a "Clear LocalStorage Cache" button (safely retaining all physical `.md` files on disk).
+
+---
+
 ## [1.0.0] - 2026-08-04
 
 ### Changed

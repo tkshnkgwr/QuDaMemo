@@ -20,4 +20,17 @@ export default defineConfig({
       ignored: ['**/src-tauri/**', '**/target/**'],
     },
   },
+  build: {
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-icons': ['lucide-react'],
+          'vendor-markdown': ['react-markdown', 'remark-gfm', 'js-yaml'],
+          'vendor-ai': ['@google/genai'],
+        },
+      },
+    },
+  },
 });
