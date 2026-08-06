@@ -1,8 +1,6 @@
 //! QuDaMemo Tauri Commands Module
 
-use super::{
-    delete_memo_file_impl, load_all_memos_impl, save_memo_file_impl, QuickMemoDto,
-};
+use super::{delete_memo_file_impl, load_all_memos_impl, save_memo_file_impl, QuickMemoDto};
 
 /// 物理保存先の全 `.md` ファイルを爆速で並列読み込みパースする Rust ネイティブコマンド
 #[tauri::command]

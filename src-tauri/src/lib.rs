@@ -91,13 +91,32 @@ pub fn parse_markdown_to_memo(file_path: &Path, raw: &str) -> Option<QuickMemoDt
             for line in yaml_str.lines() {
                 let line = line.trim();
                 if line.starts_with("title:") {
-                    title = line.trim_start_matches("title:").trim().trim_matches('"').trim_matches('\'').to_string();
+                    title = line
+                        .trim_start_matches("title:")
+                        .trim()
+                        .trim_matches('"')
+                        .trim_matches('\'')
+                        .to_string();
                 } else if line.starts_with("summary:") {
-                    summary = line.trim_start_matches("summary:").trim().trim_matches('"').trim_matches('\'').to_string();
+                    summary = line
+                        .trim_start_matches("summary:")
+                        .trim()
+                        .trim_matches('"')
+                        .trim_matches('\'')
+                        .to_string();
                 } else if line.starts_with("weekday:") {
-                    weekday = line.trim_start_matches("weekday:").trim().trim_matches('"').trim_matches('\'').to_string();
+                    weekday = line
+                        .trim_start_matches("weekday:")
+                        .trim()
+                        .trim_matches('"')
+                        .trim_matches('\'')
+                        .to_string();
                 } else if line.starts_with("holiday:") {
-                    let h = line.trim_start_matches("holiday:").trim().trim_matches('"').trim_matches('\'');
+                    let h = line
+                        .trim_start_matches("holiday:")
+                        .trim()
+                        .trim_matches('"')
+                        .trim_matches('\'');
                     if !h.is_empty() && h != "null" {
                         holiday = Some(h.to_string());
                     }
@@ -112,7 +131,8 @@ pub fn parse_markdown_to_memo(file_path: &Path, raw: &str) -> Option<QuickMemoDt
                     let tags_part = line.trim_start_matches("tags:").trim();
                     if tags_part.starts_with('[') && tags_part.ends_with(']') {
                         let inner = &tags_part[1..tags_part.len() - 1];
-                        tags = inner.split(',')
+                        tags = inner
+                            .split(',')
                             .map(|s| s.trim().trim_matches('"').trim_matches('\'').to_string())
                             .filter(|s| !s.is_empty())
                             .collect();
@@ -214,9 +234,7 @@ pub fn run() {
             commands::save_memo_file,
             commands::delete_memo_file
         ])
-        .setup(|_app| {
-            Ok(())
-        })
+        .setup(|_app| Ok(()))
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
