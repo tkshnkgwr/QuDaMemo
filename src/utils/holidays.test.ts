@@ -23,4 +23,10 @@ describe('日本の祝日・曜日ユーティリティの単体テスト', () =
     // 2026年8月9日は日曜日
     expect(getJapaneseWeekday('2026-08-09')).toBe('日曜日');
   });
+
+  it('customHolidaysで独自の祝日が反映・上書きされること', () => {
+    const custom = { '2026-08-15': 'お盆休み' };
+    const holidays = getJapaneseHolidays(2026, custom);
+    expect(holidays['2026-08-15']).toBe('お盆休み');
+  });
 });

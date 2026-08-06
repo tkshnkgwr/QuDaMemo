@@ -63,9 +63,12 @@ function formatDate(year: number, month: number, day: number): string {
 }
 
 /**
- * 指定年の日本の法定祝日一覧を計算・生成
+ * 指定年の日本の法定祝日＋設定ファイル等のカスタム祝日一覧を計算・生成
  */
-export function getJapaneseHolidays(year: number): Record<string, string> {
+export function getJapaneseHolidays(
+  year: number,
+  customHolidays?: Record<string, string>
+): Record<string, string> {
   const holidays: Record<string, string> = {};
 
   // 固定日付の祝日
@@ -119,19 +122,37 @@ export function getJapaneseHolidays(year: number): Record<string, string> {
     }
   }
 
+  // 設定ファイル/ユーザーカスタム祝日の上書き・マージ
+  if (customHolidays) {
+    for (const [dateStr, name] of Object.entries(customHolidays)) {
+      if (dateStr.startsWith(String(year))) {
+        if (name && name.trim() !== '') {
+          holidays[dateStr] = name.trim();
+        } else {
+          // 空文字がセットされた場合は祝日を解除
+          delete holidays[dateStr];
+        }
+      }
+    }
+  }
+
   return holidays;
 }
 
 /**
  * 指定日付（YYYY-MM-DD）が日本の祝日か判定し、祝日名を返す
  */
-export function getHolidayName(dateStr: string): string | null {
+export function getHolidayName(
+  dateStr: string,
+  customHolidays?: Record<string, string>
+): string | null {
   if (!dateStr || dateStr.length < 10) return null;
   const parts = dateStr.split('-');
   if (parts.length < 3) return null;
   const year = parseInt(parts[0], 10);
   if (isNaN(year)) return null;
 
-  const holidaysMap = getJapaneseHolidays(year);
+  const holidaysMap = getJapaneseHolidays(year, customHolidays);
   return holidaysMap[dateStr] || null;
 }
+

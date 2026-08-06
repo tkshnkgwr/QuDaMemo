@@ -15,6 +15,7 @@ interface CalendarViewProps {
   memos: QuickMemo[];
   filter: SearchFilter;
   calendarStartDay?: 'monday' | 'sunday';
+  customHolidays?: Record<string, string>;
   viewType?: 'month' | 'week';
   onSelectDate: (dateStr: string) => void;
 }
@@ -23,6 +24,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   memos,
   filter,
   calendarStartDay = 'monday',
+  customHolidays,
   viewType = 'month',
   onSelectDate,
 }) => {
@@ -96,7 +98,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
    * 6行（42日間）の月間カレンダーグリッドを作成
    */
   const buildMonthGrid = () => {
-    const holidaysMap = getJapaneseHolidays(currentYear);
+    const holidaysMap = getJapaneseHolidays(currentYear, customHolidays);
     const firstDayOfMonth = new Date(currentYear, currentMonth - 1, 1);
     const dayOfWeek = firstDayOfMonth.getDay(); // 0 = 日曜日, 1 = 月曜日 ... 6 = 土曜日
 
@@ -182,7 +184,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
       const dateStr = `${yyyy}-${mm}-${dd}`;
       const idStr = `${yyyy}${mm}${dd}`;
 
-      const holidaysMap = getJapaneseHolidays(cellDate.getFullYear());
+      const holidaysMap = getJapaneseHolidays(cellDate.getFullYear(), customHolidays);
       const holidayName = holidaysMap[dateStr] || null;
       const isToday = dateStr === today.toISOString().slice(0, 10);
       const isCurrentMonth = true;
@@ -330,14 +332,13 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 <div
                   key={cell.dateStr}
                   onClick={() => onSelectDate(cell.dateStr)}
-                  onMouseEnter={(e) => {
-                    const rect = e.currentTarget.getBoundingClientRect();
+                  onMouseMove={(e) => {
                     setHoveredCell({
                       dateStr: cell.dateStr,
                       holidayName: cell.holidayName,
                       memo: cell.memo,
-                      x: rect.left,
-                      y: rect.bottom + window.scrollY,
+                      x: e.clientX,
+                      y: e.clientY,
                     });
                   }}
                   onMouseLeave={() => setHoveredCell(null)}
@@ -462,14 +463,13 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                   <div
                     key={cell.dateStr}
                     onClick={() => onSelectDate(cell.dateStr)}
-                    onMouseEnter={(e) => {
-                      const rect = e.currentTarget.getBoundingClientRect();
+                    onMouseMove={(e) => {
                       setHoveredCell({
                         dateStr: cell.dateStr,
                         holidayName: cell.holidayName,
                         memo: cell.memo,
-                        x: rect.left,
-                        y: rect.bottom + window.scrollY,
+                        x: e.clientX,
+                        y: e.clientY,
                       });
                     }}
                     onMouseLeave={() => setHoveredCell(null)}

@@ -102,8 +102,10 @@ export const MemoEditor: React.FC<MemoEditorProps> = ({
     const delaySeconds = Math.max(1, settings.autoSaveIntervalSeconds || 10);
     const timer = setTimeout(() => {
       setSaveStatus('saving');
+      const nowFormatted = new Date().toISOString().replace('T', ' ').slice(0, 19);
       const updatedFm = {
         ...memo.frontmatter,
+        updated_at: nowFormatted,
         tags,
         ...(aiSummary ? { summary: aiSummary } : {}),
       };
@@ -317,8 +319,10 @@ export const MemoEditor: React.FC<MemoEditorProps> = ({
     const hasNoSummary = !aiSummary || aiSummary.includes('未生成') || aiSummary.includes('要約はありません') || aiSummary.includes('スキップ');
 
     // 1. 直ちに最新の本文・タグをローカル確定保存
+    const nowFormatted = new Date().toISOString().replace('T', ' ').slice(0, 19);
     const currentFm = {
       ...memo.frontmatter,
+      updated_at: nowFormatted,
       tags,
       ...(aiSummary ? { summary: aiSummary } : {}),
     };
@@ -507,6 +511,15 @@ export const MemoEditor: React.FC<MemoEditorProps> = ({
                 >
                   <Lock className="w-2.5 h-2.5 text-slate-400" />
                   {memo.frontmatter.holiday ? `"${memo.frontmatter.holiday}"` : 'null'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-16 font-mono text-[11px] text-slate-500 dark:text-slate-400 shrink-0">
+                  updated_at:
+                </span>
+                <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono text-[11px] border border-slate-200 dark:border-slate-700 flex items-center gap-1">
+                  <Lock className="w-2.5 h-2.5 text-slate-400" />
+                  "{memo.frontmatter.updated_at || '未設定'}"
                 </span>
               </div>
               {memo.frontmatter.summary_type && (

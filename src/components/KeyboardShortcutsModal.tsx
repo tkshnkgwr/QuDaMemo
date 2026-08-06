@@ -53,7 +53,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ 
         },
         {
           keys: ['F1'],
-          description: 'ショートカットヘルプ表示',
+          description: 'キーボードショートカット確認表示',
           icon: <HelpCircle className="w-3.5 h-3.5 text-sky-500" />,
         },
         {
@@ -100,9 +100,9 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ 
               <Keyboard className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold tracking-tight">キーボードショートカット (Shortcuts)</h2>
+              <h2 className="text-base font-bold tracking-tight">キーボードショートカット (Keyboard Shortcuts)</h2>
               <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                QuDaMemo で利用可能なキーボード操作一覧
+                QuDaMemo で利用可能な操作キー一覧
               </p>
             </div>
           </div>
@@ -154,7 +154,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ 
         <div className="px-6 py-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 flex items-center justify-between shrink-0">
           <p className="text-[11px] text-slate-400 flex items-center gap-1">
             <Command className="w-3.5 h-3.5 text-sky-500" />
-            <span>F1 キー または {modKey} + ? でいつでもヘルプを表示できます</span>
+            <span>F1 キー または {modKey} + ? でいつでも表示できます</span>
           </p>
           <button
             type="button"

@@ -24,6 +24,7 @@ interface TitleBarProps {
   settings: AppSettings;
   onUpdateSettings: (newSettings: AppSettings) => void;
   onOpenSettings: () => void;
+  onOpenOverview: () => void;
   onOpenHelp: () => void;
   onOpenLogs: () => void;
   onOpenAbout: () => void;
@@ -34,6 +35,7 @@ export const TitleBar: React.FC<TitleBarProps> = ({
   settings,
   onUpdateSettings,
   onOpenSettings,
+  onOpenOverview,
   onOpenHelp,
   onOpenLogs,
   onOpenAbout,
@@ -123,9 +125,6 @@ export const TitleBar: React.FC<TitleBarProps> = ({
           <span data-tauri-drag-region className="font-bold text-slate-800 dark:text-slate-100 tracking-tight">
             QuDaMemo
           </span>
-          <span data-tauri-drag-region className="px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-mono text-[10px] font-semibold border border-slate-300/40 dark:border-slate-700/60 leading-none">
-            v{version}
-          </span>
         </div>
       </div>
 
@@ -159,6 +158,19 @@ export const TitleBar: React.FC<TitleBarProps> = ({
 
           {isHelpMenuOpen && (
             <div className="absolute right-0 mt-1 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-50 py-1 text-xs animate-in fade-in duration-100 select-none">
+              <button
+                onClick={() => {
+                  onOpenOverview();
+                  setIsHelpMenuOpen(false);
+                }}
+                className="w-full px-3 py-2 text-left flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium cursor-pointer"
+              >
+                <span className="flex items-center gap-2">
+                  <HelpCircle className="w-3.5 h-3.5 text-sky-500" />
+                  アプリ概要 ＆ 使い方ガイド
+                </span>
+              </button>
+
               <button
                 onClick={() => {
                   onOpenHelp();
@@ -197,7 +209,6 @@ export const TitleBar: React.FC<TitleBarProps> = ({
                   <Info className="w-3.5 h-3.5 text-indigo-500" />
                   QuDaMemo について
                 </span>
-                <span className="text-[10px] text-slate-400 font-mono">v{version}</span>
               </button>
             </div>
           )}

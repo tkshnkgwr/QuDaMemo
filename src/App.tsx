@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { QuickMemo, AppSettings, ActiveViewMode, SearchFilter } from './types';
 import {
   loadAppSettings,
+  loadAppSettingsAsync,
   saveAppSettings,
   loadAllMemos,
   loadAllMemosAsync,
@@ -17,6 +18,7 @@ import { CalendarView } from './components/CalendarView';
 import { MemoEditor } from './components/MemoEditor';
 import { SettingsModal } from './components/SettingsModal';
 import { KeyboardShortcutsModal } from './components/KeyboardShortcutsModal';
+import { AppOverviewModal } from './components/AppOverviewModal';
 import { LogViewerModal } from './components/LogViewerModal';
 import { AboutModal } from './components/AboutModal';
 
@@ -26,19 +28,33 @@ export default function App() {
 
   // ビューおよびナビゲーションの状態
   const [viewMode, setViewMode] = useState<ActiveViewMode>('list'); // 初期起動時はリストビュー
+  const [previousViewMode, setPreviousViewMode] = useState<ActiveViewMode>('list'); // 編集前の画面記憶
   const [activeMemo, setActiveMemo] = useState<QuickMemo | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [showOverviewModal, setShowOverviewModal] = useState(false);
   const [showShortcutsModal, setShowShortcutsModal] = useState(false);
   const [showLogsModal, setShowLogsModal] = useState(false);
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [summarizingMemoId, setSummarizingMemoId] = useState<string | null>(null);
 
-  // 検索フィルターの状態
-  const [filter, setFilter] = useState<SearchFilter>({
+  // 当月の1日〜末日の日付範囲を取得するヘルパー
+  const getCurrentMonthDateRange = () => {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const firstDay = `${yyyy}-${mm}-01`;
+    const lastDayObj = new Date(yyyy, now.getMonth() + 1, 0);
+    const lastDd = String(lastDayObj.getDate()).padStart(2, '0');
+    const lastDay = `${yyyy}-${mm}-${lastDd}`;
+    return { start: firstDay, end: lastDay };
+  };
+
+  // 検索フィルターの状態 (デフォルトで今月の範囲を設定)
+  const [filter, setFilter] = useState<SearchFilter>(() => ({
     keyword: '',
     tag: '',
-    dateRange: { start: '', end: '' },
-  });
+    dateRange: getCurrentMonthDateRange(),
+  }));
 
   // グローバルショートカットキーリスナー (F1 / Ctrl+? / Cmd+? / Ctrl+, 等)
   useEffect(() => {
@@ -59,6 +75,10 @@ export default function App() {
 
       // Esc キーでモーダルを閉じる
       if (e.key === 'Escape') {
+        if (showOverviewModal) {
+          setShowOverviewModal(false);
+          return;
+        }
         if (showShortcutsModal) {
           setShowShortcutsModal(false);
           return;
@@ -88,12 +108,15 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [showShortcutsModal, isSettingsOpen, memos]);
 
-  // 起動時にローカル保存先フォルダ(storagePath)から物理.mdファイルをロード
+  // 起動時に設定ファイル (config.json) およびローカル保存先フォルダ (storagePath) から物理データをロード
   useEffect(() => {
-    loadAllMemosAsync(settings).then((loaded) => {
-      if (loaded && loaded.length > 0) {
-        setMemos(loaded);
-      }
+    loadAppSettingsAsync().then((loadedSettings) => {
+      setSettings(loadedSettings);
+      loadAllMemosAsync(loadedSettings).then((loaded) => {
+        if (loaded && loaded.length > 0) {
+          setMemos(loaded);
+        }
+      });
     });
   }, [settings.storagePath]);
 
@@ -167,6 +190,9 @@ export default function App() {
    * 今日のメモ（YYYYMMDD.md）を開くまたは新規作成（1日1メモのルールを適用）
    */
   const handleOpenTodayMemo = () => {
+    if (viewMode !== 'editor') {
+      setPreviousViewMode(viewMode);
+    }
     const todayStr = new Date().toISOString().slice(0, 10);
     const { memo, updatedMemos } = getOrCreateMemoForDate(todayStr, memos, settings.fileNameRule, settings);
     setMemos(updatedMemos);
@@ -178,6 +204,9 @@ export default function App() {
    * カレンダーで選択された日付（YYYY-MM-DD）のメモを開くまたは新規作成
    */
   const handleSelectDate = (dateStr: string) => {
+    if (viewMode !== 'editor') {
+      setPreviousViewMode(viewMode);
+    }
     const { memo, updatedMemos } = getOrCreateMemoForDate(dateStr, memos, settings.fileNameRule, settings);
     setMemos(updatedMemos);
     setActiveMemo(memo);
@@ -188,6 +217,9 @@ export default function App() {
    * リストからメモを選択したときのハンドラー
    */
   const handleSelectMemoFromList = (memo: QuickMemo) => {
+    if (viewMode !== 'editor') {
+      setPreviousViewMode(viewMode);
+    }
     setActiveMemo(memo);
     setViewMode('editor');
   };
@@ -199,6 +231,7 @@ export default function App() {
         settings={settings}
         onUpdateSettings={setSettings}
         onOpenSettings={() => setIsSettingsOpen(true)}
+        onOpenOverview={() => setShowOverviewModal(true)}
         onOpenHelp={() => setShowShortcutsModal(true)}
         onOpenLogs={() => setShowLogsModal(true)}
         onOpenAbout={() => setShowAboutModal(true)}
@@ -215,7 +248,7 @@ export default function App() {
             onSaveMemo={handleSaveMemo}
             onCloseEditor={() => {
               setActiveMemo(null);
-              setViewMode('list'); // 閉じた際にリストビューへ戻る
+              setViewMode(previousViewMode); // 遷移元（月カレンダー/週カレンダー/リスト）へ復帰
             }}
             onStartBackgroundSummary={(memoId) => setSummarizingMemoId(memoId)}
             onFinishBackgroundSummary={() => {
@@ -235,7 +268,6 @@ export default function App() {
               filter={filter}
               onUpdateFilter={setFilter}
               onOpenTodayMemo={handleOpenTodayMemo}
-              onOpenShortcuts={() => setShowShortcutsModal(true)}
               availableTags={availableTags}
             />
 
@@ -255,6 +287,7 @@ export default function App() {
                 memos={memos}
                 filter={filter}
                 calendarStartDay={settings.calendarStartDay}
+                customHolidays={settings.customHolidays}
                 viewType={viewMode === 'calendar_week' ? 'week' : 'month'}
                 onSelectDate={handleSelectDate}
               />
@@ -273,6 +306,13 @@ export default function App() {
             saveAllMemos(memos, newSettings);
           }}
           onClose={() => setIsSettingsOpen(false)}
+        />
+      )}
+
+      {/* App Overview & User Guide Modal (アプリ概要 ＆ 使い方ガイド画面) */}
+      {showOverviewModal && (
+        <AppOverviewModal
+          onClose={() => setShowOverviewModal(false)}
         />
       )}
 

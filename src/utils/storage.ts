@@ -2,7 +2,13 @@ import { QuickMemo, AppSettings, MemoFrontmatter } from '../types';
 import { buildMarkdownFile, parseMarkdownFile } from './frontmatter';
 import { getJapaneseWeekday, getHolidayName } from './holidays';
 import { exportFileWithDialog } from './dialog';
-import { writeMemoToDisk, loadMemosFromDisk, deleteMemoFromDisk } from './fileStorage';
+import {
+  writeMemoToDisk,
+  loadMemosFromDisk,
+  deleteMemoFromDisk,
+  saveConfigFileToDisk,
+  loadConfigFileFromDisk,
+} from './fileStorage';
 import { logger } from './logger';
 
 // UPDATE [2026-08-03]: デフォルト保存先パスとストレージキーを QuDaMemo (QuickDailyMemo) に変更
@@ -151,15 +157,39 @@ export function loadAppSettings(): AppSettings {
 }
 
 /**
- * 設定をlocalStorageに保存する
+ * 設定をlocalStorageおよび物理設定ファイル (config.json) に保存する
  */
 export function saveAppSettings(settings: AppSettings): void {
   try {
     logger.setStoragePath(settings.storagePath);
     localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(settings));
+    saveConfigFileToDisk(settings).catch((err) => {
+      console.warn('物理設定ファイルへの保存に失敗しました:', err);
+    });
   } catch (e) {
     console.error('設定の保存に失敗しました:', e);
   }
+}
+
+/**
+ * 非同期で物理設定ファイル (config.json) または localStorage から最新設定を読み込む
+ */
+export async function loadAppSettingsAsync(): Promise<AppSettings> {
+  const localSettings = loadAppSettings();
+  try {
+    const diskSettings = await loadConfigFileFromDisk(
+      localSettings.configFilePath,
+      localSettings.storagePath
+    );
+    if (diskSettings) {
+      const merged = { ...DEFAULT_SETTINGS, ...localSettings, ...diskSettings };
+      saveAppSettings(merged);
+      return merged;
+    }
+  } catch (err) {
+    console.warn('設定ファイルの非同期読み込みに失敗しました:', err);
+  }
+  return localSettings;
 }
 
 /**
@@ -322,11 +352,13 @@ export function getOrCreateMemoForDate(dateStr: string, memos: QuickMemo[], file
 
   // この日付の新しいメモを作成
   const weekday = getJapaneseWeekday(dateStr);
-  const holiday = getHolidayName(dateStr);
+  const holiday = getHolidayName(dateStr, settings?.customHolidays);
+  const nowFormatted = new Date().toISOString().replace('T', ' ').slice(0, 19);
   const frontmatter: MemoFrontmatter = {
     date: dateStr,
     weekday,
     holiday,
+    updated_at: nowFormatted,
     tags: ['メモ'],
   };
 

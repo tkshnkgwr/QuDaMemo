@@ -32,7 +32,7 @@ pub struct FrontmatterDto {
     #[serde(default)]
     pub tags: Vec<String>,
     /// 最終更新日時
-    #[serde(default, rename = "updatedAt")]
+    #[serde(default, alias = "updatedAt")]
     pub updated_at: Option<String>,
 }
 
@@ -101,8 +101,13 @@ pub fn parse_markdown_to_memo(file_path: &Path, raw: &str) -> Option<QuickMemoDt
                     if !h.is_empty() && h != "null" {
                         holiday = Some(h.to_string());
                     }
-                } else if line.starts_with("updatedAt:") {
-                    updated_at = line.trim_start_matches("updatedAt:").trim().trim_matches('"').trim_matches('\'').to_string();
+                } else if line.starts_with("updated_at:") || line.starts_with("updatedAt:") {
+                    let val = if line.starts_with("updated_at:") {
+                        line.trim_start_matches("updated_at:")
+                    } else {
+                        line.trim_start_matches("updatedAt:")
+                    };
+                    updated_at = val.trim().trim_matches('"').trim_matches('\'').to_string();
                 } else if line.starts_with("tags:") {
                     let tags_part = line.trim_start_matches("tags:").trim();
                     if tags_part.starts_with('[') && tags_part.ends_with(']') {

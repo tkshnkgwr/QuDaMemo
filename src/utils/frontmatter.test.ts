@@ -42,6 +42,18 @@ tags: ["React", "TypeScript"]
     const result = buildMarkdownFile(frontmatter, content);
 
     expect(result).toContain('summary: 生成されたサマリー');
+    expect(result).toContain('updated_at:');
     expect(result).toContain('新しく書かれた本文です。');
+  });
+
+  it('updated_atがフロントマターに記録・保持されること', () => {
+    const raw = `---
+date: "2026-08-07"
+updated_at: "2026-08-07 04:15:00"
+tags: ["Test"]
+---
+テスト本文`;
+    const { frontmatter } = parseMarkdownFile(raw);
+    expect(frontmatter.updated_at).toBe('2026-08-07 04:15:00');
   });
 });

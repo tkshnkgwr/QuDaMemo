@@ -12,7 +12,6 @@
 - **他言語経験者への解説補足**:
   - React Hooks (useState / useEffect 等): 状態変数とイベントライフタイムの監視ハンドラーとして説明します。
   - Rust 所有権・参照 (Move / Borrow): メモリ管理と参照の安全貸し出しとして説明します。
-- **Markdown表の縦整列**: 生テキスト画面（gVim等）で一目で直感的に読めるよう、パイプ `|` の垂直整列を維持します。
 
 ---
 
@@ -40,7 +39,6 @@
 
 ## 4. バージョン管理ルール (Semantic Versioning)
 - 大賢者が修正規模に応じて自発的に `package.json`, `src-tauri/Cargo.toml`, `src-tauri/tauri.conf.json` のバージョン番号を統一更新し、`CHANGELOG.md` を同期記録します。
-  - **MAJOR (x.0.0)**: 破壊的変更・大規模型再設計
+  - **MAJOR (x.0.0)**: 破壊的変更・大規型設計
   - **MINOR (0.x.0)**: 新機能・大基盤/ライブラリ導入
   - **PATCH (0.0.x)**: バグ修正・細かな調整
-

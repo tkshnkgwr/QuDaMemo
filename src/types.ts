@@ -2,6 +2,7 @@ export interface MemoFrontmatter {
   date: string; // YYYY-MM-DD 形式
   weekday: string; // 例: "金曜日"
   holiday: string | null; // 例: "山の日" または null
+  updated_at?: string; // 最終更新日時（例: "2026-08-07 04:15:00"、編集不可）
   tags: string[];
   summary?: string; // AI要約テキスト (YAMLフロントマター保存用)
   summary_type?: string; // 例: "gemini-3.6-flash", "gemini-3.6-pro", "local-fallback"
@@ -45,6 +46,7 @@ export interface AppSettings {
   theme: 'dark' | 'light' | 'system';
   calendarStartDay: 'monday' | 'sunday';
   autoSaveIntervalSeconds?: number; // 自動保存までのタイマー秒数 (デフォルト: 10秒, 0不可)
+  customHolidays?: Record<string, string>; // カスタム祝日・休日設定 (例: { "2026-08-15": "お盆休み" })
   googleDriveEnabled: boolean;
   windowBounds: {
     x: number;

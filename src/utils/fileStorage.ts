@@ -171,3 +171,69 @@ export async function deleteMemoFromDisk(
     }
   }
 }
+
+/**
+ * AppSettings を設定ファイル (config.json) へ書き込み保存する
+ */
+export async function saveConfigFileToDisk(settings: import('../types').AppSettings): Promise<boolean> {
+  const configPath = settings.configFilePath || './config.json';
+  try {
+    const jsonStr = JSON.stringify(settings, null, 2);
+    await writeTextFile(configPath, jsonStr);
+    logger.info(`設定ファイル (config.json) へ保存しました: ${configPath}`);
+    return true;
+  } catch (err) {
+    try {
+      if (settings.storagePath) {
+        await ensureDirectoryExists(settings.storagePath);
+        const separator = settings.storagePath.endsWith('\\') || settings.storagePath.endsWith('/') ? '' : '\\';
+        const fallbackConfigPath = `${settings.storagePath}${separator}config.json`;
+        await writeTextFile(fallbackConfigPath, JSON.stringify(settings, null, 2));
+        logger.info(`保存先フォルダ内設定ファイルへ保存しました: ${fallbackConfigPath}`);
+        return true;
+      }
+    } catch (fallbackErr) {
+      logger.warn('設定ファイルの書き込みに失敗しました:', err);
+    }
+    return false;
+  }
+}
+
+/**
+ * 設定ファイル (config.json) から AppSettings を読み込む
+ */
+export async function loadConfigFileFromDisk(
+  configFilePath?: string,
+  storagePath?: string
+): Promise<Partial<import('../types').AppSettings> | null> {
+  const configPath = configFilePath || './config.json';
+  try {
+    const isExist = await exists(configPath);
+    if (isExist) {
+      const text = await readTextFile(configPath);
+      const parsed = JSON.parse(text);
+      logger.info(`設定ファイル (config.json) を読み込みました: ${configPath}`);
+      return parsed;
+    }
+  } catch (err) {
+    // フォールバック試行へ
+  }
+
+  if (storagePath) {
+    try {
+      const separator = storagePath.endsWith('\\') || storagePath.endsWith('/') ? '' : '\\';
+      const fallbackConfigPath = `${storagePath}${separator}config.json`;
+      const isExist = await exists(fallbackConfigPath);
+      if (isExist) {
+        const text = await readTextFile(fallbackConfigPath);
+        const parsed = JSON.parse(text);
+        logger.info(`保存先フォルダ内設定ファイルを読み込みました: ${fallbackConfigPath}`);
+        return parsed;
+      }
+    } catch (err) {
+      // 無視
+    }
+  }
+  return null;
+}
+

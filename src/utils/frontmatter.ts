@@ -28,10 +28,13 @@ export function parseMarkdownFile(rawContent: string, fallbackDateStr?: string):
     }
   }
 
-  // 編集不可項目（date, weekday, holiday）を正確に再計算・補正
+  // 編集不可項目（date, weekday, holiday, updated_at）を正確に再計算・補正
   const dateVal = (parsedFm.date as string) || dateToUse;
   const weekdayVal = getJapaneseWeekday(dateVal);
   const holidayVal = getHolidayName(dateVal);
+  const updatedAtVal =
+    (parsedFm.updated_at as string) ||
+    new Date().toISOString().replace('T', ' ').slice(0, 19);
   const summaryVal = (parsedFm.summary as string) || (parsedFm.aiSummary as string) || undefined;
   const summaryTypeVal = (parsedFm.summary_type as string) || undefined;
 
@@ -44,6 +47,7 @@ export function parseMarkdownFile(rawContent: string, fallbackDateStr?: string):
     date: dateVal,
     weekday: weekdayVal,
     holiday: holidayVal,
+    updated_at: updatedAtVal,
     tags: tagsArray,
     ...(summaryVal ? { summary: summaryVal } : {}),
     ...(summaryTypeVal ? { summary_type: summaryTypeVal } : {}),
@@ -62,11 +66,14 @@ export function buildMarkdownFile(frontmatter: MemoFrontmatter, bodyContent: str
   // 曜日と祝日名を正確に更新
   const weekdayVal = getJapaneseWeekday(frontmatter.date);
   const holidayVal = getHolidayName(frontmatter.date);
+  const updatedAtVal =
+    frontmatter.updated_at || new Date().toISOString().replace('T', ' ').slice(0, 19);
 
   const fmObject: MemoFrontmatter = {
     date: frontmatter.date,
     weekday: weekdayVal,
     holiday: holidayVal,
+    updated_at: updatedAtVal,
     tags: Array.isArray(frontmatter.tags) ? frontmatter.tags : [],
   };
 
@@ -92,11 +99,14 @@ export function buildMarkdownFile(frontmatter: MemoFrontmatter, bodyContent: str
 export function formatFrontmatterYaml(frontmatter: MemoFrontmatter): string {
   const weekdayVal = getJapaneseWeekday(frontmatter.date);
   const holidayVal = getHolidayName(frontmatter.date);
+  const updatedAtVal =
+    frontmatter.updated_at || new Date().toISOString().replace('T', ' ').slice(0, 19);
 
   const fmObject: Record<string, unknown> = {
     date: frontmatter.date,
     weekday: weekdayVal,
     holiday: holidayVal,
+    updated_at: updatedAtVal,
     tags: frontmatter.tags || [],
   };
 
@@ -109,3 +119,4 @@ export function formatFrontmatterYaml(frontmatter: MemoFrontmatter): string {
 
   return dump(fmObject, { indent: 2, lineWidth: -1 }).trim();
 }
+

@@ -60,6 +60,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [showApiKey, setShowApiKey] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [newHolidayDate, setNewHolidayDate] = useState('');
+  const [newHolidayName, setNewHolidayName] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // UPDATE [2026-08-03]: AI接続テスト用ステート (前回の保存されたテスト結果があれば初期復元)
@@ -948,6 +950,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   </div>
 
                   <div className="space-y-1 pt-1 border-t border-amber-200/40 dark:border-amber-800/30 text-[11px]">
+                    {/* ⚠️ キャッシュ削除の影響と注意点 */}
+                    <div className="bg-white/80 dark:bg-slate-900/80 rounded-xl p-3 border border-amber-200/50 dark:border-amber-800/50 space-y-1.5 text-[11px] mb-2">
+                      <div className="font-bold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
+                        <AlertCircle className="w-4 h-4 text-amber-500 shrink-0" />
+                        <span>キャッシュ削除の影響と注意点</span>
+                      </div>
+                      <ul className="list-disc list-inside space-y-1 text-slate-600 dark:text-slate-300 pl-1 leading-relaxed text-[11px]">
+                        <li><strong>実ファイルは削除されません:</strong> 指定ローカル保存先の `.md` メモ本体ファイルは一切削除されず保護されます。</li>
+                        <li><strong>次回アクセス時に自動復旧:</strong> キャッシュ全消去後も、次回起動時またはメモ読み込み時に物理ファイルから自動再生成されます。</li>
+                        <li><strong>一時的な影響:</strong> 消去直後の初回読み込み時のみ、ファイル検索・再読み込みのため数ミリ秒のロード時間がかかる場合があります。</li>
+                      </ul>
+                    </div>
+
                     <div className="font-bold text-slate-700 dark:text-slate-300">
                       📍 LocalStorage 物理格納先パス（WebView2 データフォルダ）:
                     </div>
@@ -986,6 +1001,93 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       <div className="w-9 h-5 bg-slate-300 peer-focus:outline-hidden rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
                     </label>
                   </div>
+                </div>
+
+                {/* カスタム祝日・休日設定（設定ファイル保存） */}
+                <div className="p-4 rounded-2xl bg-sky-50/50 dark:bg-sky-950/30 border border-sky-200/60 dark:border-sky-800/40 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-sky-500" />
+                    <div>
+                      <div className="font-bold text-xs text-slate-900 dark:text-slate-100">
+                        カスタム祝日・休日管理 (設定ファイル保存)
+                      </div>
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                        法定祝日に加えて独自の休日・創立記念日などを設定ファイル (config.json) に保存
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 登録入力フォーム */}
+                  <div className="flex items-center gap-2 bg-white/80 dark:bg-slate-900/80 p-2 rounded-xl border border-sky-200/40 dark:border-sky-800/40">
+                    <input
+                      type="date"
+                      value={newHolidayDate}
+                      onChange={(e) => setNewHolidayDate(e.target.value)}
+                      className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-mono"
+                    />
+                    <input
+                      type="text"
+                      placeholder="祝日・休日名 (例: 夏季休暇)"
+                      value={newHolidayName}
+                      onChange={(e) => setNewHolidayName(e.target.value)}
+                      className="flex-1 px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!newHolidayDate || !newHolidayName.trim()) return;
+                        setFormData((prev) => ({
+                          ...prev,
+                          customHolidays: {
+                            ...(prev.customHolidays || {}),
+                            [newHolidayDate]: newHolidayName.trim(),
+                          },
+                        }));
+                        setNewHolidayDate('');
+                        setNewHolidayName('');
+                      }}
+                      className="px-3 py-1 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-lg transition shrink-0 cursor-pointer"
+                    >
+                      追加
+                    </button>
+                  </div>
+
+                  {/* 登録済み祝日一覧 */}
+                  {formData.customHolidays && Object.keys(formData.customHolidays).length > 0 ? (
+                    <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-1">
+                      {Object.entries(formData.customHolidays).map(([d, name]) => (
+                        <div
+                          key={d}
+                          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-sky-200 dark:border-sky-800 text-xs shadow-2xs"
+                        >
+                          <span className="font-mono text-[11px] font-semibold text-sky-600 dark:text-sky-400">
+                            {d}
+                          </span>
+                          <span className="font-bold text-slate-700 dark:text-slate-200">
+                            {name}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFormData((prev) => {
+                                const nextHolidays = { ...(prev.customHolidays || {}) };
+                                delete nextHolidays[d];
+                                return { ...prev, customHolidays: nextHolidays };
+                              });
+                            }}
+                            className="text-slate-400 hover:text-rose-500 transition ml-0.5"
+                            title="削除"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-[11px] text-slate-400 italic text-center py-1">
+                      登録されているカスタム祝日はありません
+                    </div>
+                  )}
                 </div>
               </div>
             )}
