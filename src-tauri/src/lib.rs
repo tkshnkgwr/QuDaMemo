@@ -83,10 +83,10 @@ pub fn parse_markdown_to_memo(file_path: &Path, raw: &str) -> Option<QuickMemoDt
     let mut body_content = raw.to_string();
 
     // --- YAML Frontmatter パース ---
-    if raw.starts_with("---") {
-        if let Some(end_idx) = raw[3..].find("---") {
-            let yaml_str = &raw[3..3 + end_idx];
-            body_content = raw[3 + end_idx + 3..].trim_start().to_string();
+    if let Some(stripped) = raw.strip_prefix("---") {
+        if let Some(end_idx) = stripped.find("---") {
+            let yaml_str = &stripped[..end_idx];
+            body_content = stripped[end_idx + 3..].trim_start().to_string();
 
             for line in yaml_str.lines() {
                 let line = line.trim();
