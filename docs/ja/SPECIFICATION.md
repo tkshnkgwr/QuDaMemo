@@ -42,6 +42,16 @@ export interface LastTestResultData {
   urlLatency?: number;
 }
 
+export interface MemoFrontmatter {
+  date: string; // "YYYY-MM-DD"
+  weekday?: string; // "月", "火", "水"...
+  holiday?: string; // 祝日名
+  updated_at?: string; // 最終更新日時 "YYYY-MM-DD HH:mm:ss"
+  tags?: string[];
+  summary?: string;
+  summary_type?: string;
+}
+
 export interface AppSettings {
   storagePath: string; // ローカル物理保存先パス
   configFilePath: string; // 設定ファイルパス (./config.json)
@@ -53,6 +63,7 @@ export interface AppSettings {
   activeSummaryMode?: 'api' | 'web_proxy' | 'local_fallback'; // メイン使用要約方式
   lastTestResult?: LastTestResultData; // 接続テスト実行結果とタイムスタンプ
   autoSaveIntervalSeconds?: number; // 自動保存インターバル秒数 (デフォルト10秒)
+  customHolidays?: Record<string, string>; // ユーザー定義のカスタム祝日マップ ("YYYY-MM-DD": "祝日名")
   useWebFallbackIfNoKey: boolean;
   defaultFrontmatterTemplate: string;
   theme: 'light' | 'dark' | 'system';
