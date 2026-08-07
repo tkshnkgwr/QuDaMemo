@@ -56,7 +56,7 @@ jobs:
           tagName: ${{ github.ref_name }}
           releaseName: 'QuDaMemo ${{ github.ref_name }}'
           releaseBody: 'QuDaMemo 最新リリースアセット (.msi / .exe)'
-          releaseDraft: true
+          releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}
           projectPath: .

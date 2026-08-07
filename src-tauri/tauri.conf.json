@@ -39,7 +39,7 @@
     ],
     "windows": {
       "wix": {
-        "language": ["ja-JP"]
+        "language": ["en-US"]
       },
       "nsis": {
         "languages": ["Japanese"]
