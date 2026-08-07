@@ -54,8 +54,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: ${{ github.ref_name }} # 例: v1.0.4
-          releaseName: 'QuDaMemo ${{ github.ref_name }}'
+          tagName: v__VERSION__ # package.jsonのバージョン(例: v1.0.3)を自動適用
+          releaseName: 'QuDaMemo v__VERSION__'
           releaseBody: 'Please refer to the CHANGELOG.md for details about this release.'
           releaseDraft: true
           prerelease: false
