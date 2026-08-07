@@ -13,6 +13,7 @@
 ├── .agents/                 # AI エージェント用開発指示書 (AGENTS.md)
 ├── src/                     # React 19 / TypeScript フロントエンド
 │   ├── components/          # UIコンポーネント (MemoEditor, CalendarView 等)
+│   │   └── settings/        # 設定画面用サブコンポーネント (GeneralTab, AiTab 等)
 │   ├── utils/               # ストレージおよびヘルパー関数
 │   ├── types.ts             # 型定義
 │   ├── App.tsx              # アプリメインコンポーネント

@@ -5,7 +5,7 @@ export type LogLevel = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG';
 const MAX_LOG_SIZE_BYTES = 500 * 1024; // 500 KB
 const MAX_LOG_FILES = 3; // 最新3世代保持 (qudamemo.log, qudamemo.log.1, qudamemo.log.2)
 
-class AppLogger {
+export class AppLogger {
   private storagePath: string = '';
   private memoryLogs: string[] = [];
 
