@@ -24,8 +24,9 @@
   - 設定画面のキャッシュクリア時に「物理 `.md` ファイルは削除されない」旨の注意事項カードを明記。
 - **`SettingsModal` のモジュール分割リファクタリング**:
   - 1,000行を超過していた巨大設定画面コンポーネント（約 1,400 行）を、親モーダル [`SettingsModal.tsx`](file:///c:/Users/632792/Documents/%E8%87%AA%E4%BD%9C/QuDaMemo/src/components/SettingsModal.tsx)（約 200 行の軽量構造）と 5 つのサブコンポーネント (`GeneralTab`, `AiTab`, `ThemeTab`, `HolidaysTab`, `BackupTab`) へ完全分割・最適化。
-- **CI / Release ワークフロー構成**:
-  - GitHub CI / Release ワークフロー (`ci.yml`, `release.yml`) を整備・最適化。
+- **CI ワークフローの最適化 (`ci.yml`)**:
+  - `rust-tauri` チェックジョブ（`windows-latest`）に `Swatinem/rust-cache@v2` を導入し、依存クレートのビルドキャッシュを有効化。
+  - 重複していた不要な `npm ci` ステップを削除し処理時間を短縮。
 
 ---
 
