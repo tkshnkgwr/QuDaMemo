@@ -1,6 +1,6 @@
 [package]
 name = "QuDaMemo"
-version = "1.0.4"
+version = "1.0.5"
 description = "Lightweight Daily Markdown Note Application"
 authors = ["you"]
 edition = "2021"

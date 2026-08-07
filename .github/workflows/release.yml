@@ -4,7 +4,6 @@ on:
   push:
     tags:
       - 'v*'
-  workflow_dispatch:
 
 jobs:
   publish:
@@ -55,8 +54,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tagName: ${{ github.ref_name }}
-          releaseName: "QuDaMemo ${{ github.ref_name }}"
-          releaseBody: "QuDaMemo 最新リリースアセット (.msi / .exe)"
+          releaseName: 'QuDaMemo ${{ github.ref_name }}'
+          releaseBody: 'QuDaMemo 最新リリースアセット (.msi / .exe)'
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
