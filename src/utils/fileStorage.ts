@@ -2,7 +2,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { exists, mkdir, writeTextFile, readTextFile, readDir, remove } from '@tauri-apps/plugin-fs';
 import { QuickMemo } from '../types';
 import { parseMarkdownFile, buildMarkdownFile } from './frontmatter';
-import { formatMemoFilename } from './storage';
+import { formatMemoFilename, resolveDefaultConfigPath } from './storage';
 import { logger } from './logger';
 
 /**
@@ -173,14 +173,44 @@ export async function deleteMemoFromDisk(
 }
 
 /**
- * AppSettings を設定ファイル (config.json) へ書き込み保存する
+ * AppSettings を設定ファイル (config.json) へ書き込み保存する（Rustネイティブ爆速保存＋バックアップ多重化）
  */
 export async function saveConfigFileToDisk(settings: import('../types').AppSettings): Promise<boolean> {
-  const configPath = settings.configFilePath || './config.json';
+  const targetConfigPath =
+    settings.configFilePath && !settings.configFilePath.startsWith('.')
+      ? settings.configFilePath
+      : resolveDefaultConfigPath(settings.storagePath);
+
+  const jsonStr = JSON.stringify(settings, null, 2);
+
+  // 1. Rust ネイティブコマンドによる確実な物理保存
   try {
-    const jsonStr = JSON.stringify(settings, null, 2);
-    await writeTextFile(configPath, jsonStr);
-    logger.info(`設定ファイル (config.json) へ保存しました: ${configPath}`);
+    await invoke('save_app_config', {
+      configPath: targetConfigPath,
+      configJson: jsonStr,
+    });
+    logger.info(`【Rust爆速保存完了】設定ファイル (config.json) へ保存しました: ${targetConfigPath}`);
+
+    // バックアップとしてノートフォルダ直下 (storagePath/config.json) にも書き込み
+    if (settings.storagePath) {
+      const sep = settings.storagePath.endsWith('\\') || settings.storagePath.endsWith('/') ? '' : '\\';
+      const backupPath = `${settings.storagePath}${sep}config.json`;
+      if (backupPath !== targetConfigPath) {
+        invoke('save_app_config', {
+          configPath: backupPath,
+          configJson: jsonStr,
+        }).catch(() => {});
+      }
+    }
+    return true;
+  } catch (rustErr) {
+    logger.warn('Rust ネイティブ設定保存コマンド失敗。プラグインフォールバックを試行します:', rustErr);
+  }
+
+  // 2. Tauri JS プラグインフォールバック
+  try {
+    await writeTextFile(targetConfigPath, jsonStr);
+    logger.info(`設定ファイル保存完了 (Plugin Fallback): ${targetConfigPath}`);
     return true;
   } catch (err) {
     try {
@@ -188,7 +218,7 @@ export async function saveConfigFileToDisk(settings: import('../types').AppSetti
         await ensureDirectoryExists(settings.storagePath);
         const separator = settings.storagePath.endsWith('\\') || settings.storagePath.endsWith('/') ? '' : '\\';
         const fallbackConfigPath = `${settings.storagePath}${separator}config.json`;
-        await writeTextFile(fallbackConfigPath, JSON.stringify(settings, null, 2));
+        await writeTextFile(fallbackConfigPath, jsonStr);
         logger.info(`保存先フォルダ内設定ファイルへ保存しました: ${fallbackConfigPath}`);
         return true;
       }
@@ -200,40 +230,59 @@ export async function saveConfigFileToDisk(settings: import('../types').AppSetti
 }
 
 /**
- * 設定ファイル (config.json) から AppSettings を読み込む
+ * 設定ファイル (config.json) から AppSettings を読み込む（Rustネイティブ優先＋多重フォールバック）
  */
 export async function loadConfigFileFromDisk(
   configFilePath?: string,
   storagePath?: string
 ): Promise<Partial<import('../types').AppSettings> | null> {
-  const configPath = configFilePath || './config.json';
-  try {
-    const isExist = await exists(configPath);
-    if (isExist) {
-      const text = await readTextFile(configPath);
-      const parsed = JSON.parse(text);
-      logger.info(`設定ファイル (config.json) を読み込みました: ${configPath}`);
-      return parsed;
+  const candidatePaths: string[] = [];
+
+  if (configFilePath && !configFilePath.startsWith('.')) {
+    candidatePaths.push(configFilePath);
+  }
+  const derivedParentPath = resolveDefaultConfigPath(storagePath);
+  if (!candidatePaths.includes(derivedParentPath)) {
+    candidatePaths.push(derivedParentPath);
+  }
+  if (storagePath) {
+    const sep = storagePath.endsWith('\\') || storagePath.endsWith('/') ? '' : '\\';
+    const notesConfigPath = `${storagePath}${sep}config.json`;
+    if (!candidatePaths.includes(notesConfigPath)) {
+      candidatePaths.push(notesConfigPath);
     }
-  } catch (err) {
-    // フォールバック試行へ
   }
 
-  if (storagePath) {
+  // 1. Rust ネイティブコマンドで候補パスを順次ロード試行
+  for (const candidate of candidatePaths) {
     try {
-      const separator = storagePath.endsWith('\\') || storagePath.endsWith('/') ? '' : '\\';
-      const fallbackConfigPath = `${storagePath}${separator}config.json`;
-      const isExist = await exists(fallbackConfigPath);
+      const jsonStr = await invoke<string>('load_app_config', { configPath: candidate });
+      if (jsonStr && jsonStr.trim()) {
+        const parsed = JSON.parse(jsonStr);
+        logger.info(`【Rust爆速読込完了】設定ファイル (config.json) を読み込みました: ${candidate}`);
+        return parsed;
+      }
+    } catch (rustErr) {
+      // 候補パスが存在しない場合は次の候補へ
+    }
+  }
+
+  // 2. Tauri JS プラグインフォールバック
+  for (const candidate of candidatePaths) {
+    try {
+      const isExist = await exists(candidate);
       if (isExist) {
-        const text = await readTextFile(fallbackConfigPath);
+        const text = await readTextFile(candidate);
         const parsed = JSON.parse(text);
-        logger.info(`保存先フォルダ内設定ファイルを読み込みました: ${fallbackConfigPath}`);
+        logger.info(`設定ファイル (config.json) を読み込みました (Plugin): ${candidate}`);
         return parsed;
       }
     } catch (err) {
-      // 無視
+      // 次の候補へ
     }
   }
+
   return null;
 }
+
 

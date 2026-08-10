@@ -30,10 +30,10 @@ export interface LastTestResultData {
   urlLatency?: number;
 }
 
-// UPDATE [2026-08-03]: アプリと同階層の設定ファイル保存(configFilePath)、要約ルール(summaryRule)、AIモデル(geminiModel)、Base URLに対応
+// UPDATE [2026-08-10]: 設定ファイル保存(configFilePath)の絶対パス永続化、要約ルール(summaryRule)、AIモデル(geminiModel)、Base URLに対応
 export interface AppSettings {
-  storagePath: string; // 例: "C:\\Users\\AppData\\Roaming\\QuDaMemo\\notes" または "./notes"
-  configFilePath: string; // 例: "./config.json" (アプリと同階層)
+  storagePath: string; // 例: "C:\\Users\\632792\\Documents\\QuDaMemo\\notes"
+  configFilePath: string; // 例: "C:\\Users\\632792\\Documents\\QuDaMemo\\config.json"
   fileNameRule: string; // 例: "YYYYMMDD.md" または "{{date}}.md"
   summaryRule: string; // 要約生成時のルール/プロンプト
   geminiModel: string; // AI要約に使用するGeminiモデル (例: "gemini-3.6-flash")

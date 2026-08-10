@@ -214,6 +214,25 @@ pub fn delete_memo_file_impl(storage_path: &str, memo_id: &str) -> Result<(), St
     Ok(())
 }
 
+pub fn save_app_config_impl(config_path: &str, config_json: &str) -> Result<(), String> {
+    let path = Path::new(config_path);
+    if let Some(parent) = path.parent() {
+        if !parent.exists() {
+            fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+        }
+    }
+    fs::write(path, config_json).map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+pub fn load_app_config_impl(config_path: &str) -> Result<String, String> {
+    let path = Path::new(config_path);
+    if !path.exists() {
+        return Err(format!("File not found: {}", config_path));
+    }
+    fs::read_to_string(path).map_err(|e| e.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -232,7 +251,9 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::load_all_memos,
             commands::save_memo_file,
-            commands::delete_memo_file
+            commands::delete_memo_file,
+            commands::save_app_config,
+            commands::load_app_config
         ])
         .setup(|_app| Ok(()))
         .run(tauri::generate_context!())
@@ -314,5 +335,22 @@ updatedAt: "2026-08-04T12:00:00Z"
         delete_memo_file_impl(dir_path, "20260804").expect("削除に成功するべきです");
         let after_delete = load_all_memos_impl(dir_path).expect("読み込みに成功するべきです");
         assert_eq!(after_delete.len(), 0);
+    }
+
+    #[test]
+    fn test_save_and_load_app_config() {
+        let dir = tempdir().expect("一時ディレクトリの作成失敗");
+        let config_file_path = dir.path().join("config.json");
+        let path_str = config_file_path.to_str().unwrap();
+
+        let dummy_json = r#"{"storagePath":"C:\\Dummy","geminiApiKey":"test_api_key_123"}"#;
+
+        // 保存のテスト
+        save_app_config_impl(path_str, dummy_json).expect("設定ファイルの保存に成功するべきです");
+
+        // 読み込みのテスト
+        let loaded =
+            load_app_config_impl(path_str).expect("設定ファイルの読み込みに成功するべきです");
+        assert_eq!(loaded, dummy_json);
     }
 }

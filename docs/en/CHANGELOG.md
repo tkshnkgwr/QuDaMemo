@@ -4,6 +4,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.9] - 2026-08-10
+
+### Fixed & Improved
+- **Absolute Path Persistence & Rust Native Storage for Config (`config.json`)**:
+  - Upgraded config file storage path from relative path (`./config.json`) to an absolute path (`Documents/QuDaMemo/config.json`).
+  - Added Rust native commands (`save_app_config` / `load_app_config`) to ensure 100% reliable physical write/read irrespective of working directory or permission constraints.
+  - Added safe startup merge logic so that Gemini API keys and settings are permanently restored even across installer re-runs or WebView2 cache resets.
+  - Implemented automatic dual backup saving to `storagePath/config.json`.
+
 ## [1.0.3] - 2026-08-05
 
 ### Added & Improved

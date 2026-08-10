@@ -54,8 +54,8 @@ export interface MemoFrontmatter {
 }
 
 export interface AppSettings {
-  storagePath: string; // ローカル物理保存先パス
-  configFilePath: string; // 設定ファイルパス (./config.json)
+  storagePath: string; // ローカル物理保存先パス (例: Documents/QuDaMemo/notes)
+  configFilePath: string; // 設定ファイル絶対パス (例: Documents/QuDaMemo/config.json)
   fileNameRule: string; // ファイル命名ルール
   summaryRule: string; // AI要約ルール/プロンプト
   geminiModel: string; // 使用AIモデル

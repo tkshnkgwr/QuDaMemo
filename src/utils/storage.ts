@@ -15,10 +15,28 @@ import { logger } from './logger';
 const STORAGE_KEY_NOTES = 'qudamemo_notes_v1';
 const STORAGE_KEY_SETTINGS = 'qudamemo_settings_v1';
 
-// UPDATE [2026-08-03]: 実在するマイドキュメント配下の QuDaMemo/notes をデフォルトローカル保存先パスに設定
+/**
+ * storagePath（例: C:\Users\632792\Documents\QuDaMemo\notes）から
+ * 安全な絶対設定ファイルパス（例: C:\Users\632792\Documents\QuDaMemo\config.json）を導出する
+ */
+export function resolveDefaultConfigPath(storagePath?: string): string {
+  const defaultDir = 'C:\\Users\\632792\\Documents\\QuDaMemo';
+  if (!storagePath || !storagePath.trim()) {
+    return `${defaultDir}\\config.json`;
+  }
+  const cleanPath = storagePath.replace(/[/\\]+$/, '');
+  const lastSlashIndex = Math.max(cleanPath.lastIndexOf('\\'), cleanPath.lastIndexOf('/'));
+  if (lastSlashIndex > 0) {
+    const parentDir = cleanPath.substring(0, lastSlashIndex);
+    return `${parentDir}\\config.json`;
+  }
+  return `${cleanPath}\\config.json`;
+}
+
+// UPDATE [2026-08-10]: 実在するマイドキュメント配下の QuDaMemo/notes をデフォルトローカル保存先パス、QuDaMemo/config.json を設定ファイルパスに設定
 export const DEFAULT_SETTINGS: AppSettings = {
   storagePath: 'C:\\Users\\632792\\Documents\\QuDaMemo\\notes',
-  configFilePath: './config.json',
+  configFilePath: 'C:\\Users\\632792\\Documents\\QuDaMemo\\config.json',
   fileNameRule: 'YYYYMMDD.md',
   summaryRule: '30〜50文字程度で本日のメモの主要な出来事・タスク・決定事項を簡潔に要約してください。挨拶やプレフィックス（「要約：」等）は含めず、要約本文のみを出力してください。',
   geminiModel: 'gemini-3.6-flash',
@@ -39,6 +57,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
     isMaximized: false,
   },
 };
+
 
 /**
  * UPDATE [2026-08-03]: 現在日付からのオフセット（日）を指定して YYYY-MM-DD 形式の文字列を取得するヘルパー
@@ -125,7 +144,7 @@ function createSeedNotes(): QuickMemo[] {
 }
 
 /**
- * UPDATE [2026-08-03]: localStorageから設定を読み込む（旧要約ルールの最新マイグレーション対応）
+ * UPDATE [2026-08-10]: localStorageから設定を読み込む（絶対パス補正・旧要約ルールマイグレーション対応）
  */
 export function loadAppSettings(): AppSettings {
   try {
@@ -135,6 +154,10 @@ export function loadAppSettings(): AppSettings {
       // 旧PathやダミーPathが含まれる場合は実在するパスへ補正
       if (!parsed.storagePath || parsed.storagePath.includes('Users\\AppData') || parsed.storagePath.includes('QuickMemo')) {
         parsed.storagePath = DEFAULT_SETTINGS.storagePath;
+      }
+      // configFilePath が相対パス (./config.json 等) や空の場合は絶対パスへ自動補正
+      if (!parsed.configFilePath || parsed.configFilePath.startsWith('.') || parsed.configFilePath === 'config.json') {
+        parsed.configFilePath = resolveDefaultConfigPath(parsed.storagePath);
       }
       // UPDATE [2026-08-03]: 保存されている要約ルールが旧初期値の場合、最新のデフォルトルールへ更新する
       if (!parsed.summaryRule || parsed.summaryRule === '30〜50文字程度で本日のメモの要点を簡潔に要約してください。' || parsed.summaryRule.includes('要点を簡潔に要約')) {
@@ -151,6 +174,7 @@ export function loadAppSettings(): AppSettings {
 
   // 初回起動時: 保存先フォルダを自動作成し、設定の「ローカルの保存フォルダ」および「config.json」にセットして永続化
   const initialSettings = { ...DEFAULT_SETTINGS };
+  initialSettings.configFilePath = resolveDefaultConfigPath(initialSettings.storagePath);
   logger.setStoragePath(initialSettings.storagePath);
   saveAppSettings(initialSettings);
   return initialSettings;
@@ -172,7 +196,7 @@ export function saveAppSettings(settings: AppSettings): void {
 }
 
 /**
- * 非同期で物理設定ファイル (config.json) または localStorage から最新設定を読み込む
+ * UPDATE [2026-08-10]: 非同期で物理設定ファイル (config.json) から最新設定を復元し、localStorage と同期する
  */
 export async function loadAppSettingsAsync(): Promise<AppSettings> {
   const localSettings = loadAppSettings();
@@ -182,7 +206,24 @@ export async function loadAppSettingsAsync(): Promise<AppSettings> {
       localSettings.storagePath
     );
     if (diskSettings) {
-      const merged = { ...DEFAULT_SETTINGS, ...localSettings, ...diskSettings };
+      // ディスクから読み取れた場合は、APIキーや各設定をディスク優先でマージ
+      // （※diskSettings にキーがない/空文字で localSettings にキーがある場合は localSettings を残す安全マージ）
+      const mergedApiKey = diskSettings.geminiApiKey?.trim()
+        ? diskSettings.geminiApiKey
+        : localSettings.geminiApiKey;
+
+      const merged: AppSettings = {
+        ...DEFAULT_SETTINGS,
+        ...localSettings,
+        ...diskSettings,
+        geminiApiKey: mergedApiKey,
+      };
+
+      // パスを絶対パスに確定
+      if (!merged.configFilePath || merged.configFilePath.startsWith('.')) {
+        merged.configFilePath = resolveDefaultConfigPath(merged.storagePath);
+      }
+
       saveAppSettings(merged);
       return merged;
     }

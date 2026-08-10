@@ -43,8 +43,8 @@ export interface LastTestResultData {
 }
 
 export interface AppSettings {
-  storagePath: string; // Local storage path
-  configFilePath: string; // Settings file path (./config.json)
+  storagePath: string; // Local storage path (e.g., Documents/QuDaMemo/notes)
+  configFilePath: string; // Settings file absolute path (e.g., Documents/QuDaMemo/config.json)
   fileNameRule: string; // Naming template
   summaryRule: string; // AI summary prompt
   geminiModel: string; // Selected Gemini model
