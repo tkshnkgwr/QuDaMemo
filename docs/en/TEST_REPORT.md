@@ -3,7 +3,7 @@
 **English Version** | [日本語版](../ja/TEST_REPORT.md)
 
 ## Verification Date
-2026-08-20 (v1.1.0)
+2026-08-26 (v1.1.0)
 
 ## Test Execution Results
 
