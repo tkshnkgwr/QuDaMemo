@@ -47,9 +47,40 @@ export const AiTab: React.FC<AiTabProps> = ({
     return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`;
   };
 
+  const PRESET_MODELS = [
+    { value: 'gemini-3.7-flash', label: 'gemini-3.7-flash (最新・推論＆爆速)' },
+    { value: 'gemini-3.6-flash', label: 'gemini-3.6-flash (標準・爆速)' },
+    { value: 'gemini-3.6-pro', label: 'gemini-3.6-pro (高精度要約)' },
+    { value: 'gemini-2.5-flash', label: 'gemini-2.5-flash (軽量安定)' },
+    { value: 'gemini-2.5-pro', label: 'gemini-2.5-pro (高度推論)' },
+    { value: 'gemini-2.0-flash', label: 'gemini-2.0-flash (次世代高速標準)' },
+    { value: 'gemini-2.0-flash-lite', label: 'gemini-2.0-flash-lite (超軽量・省コスト)' },
+    { value: 'gemini-1.5-pro', label: 'gemini-1.5-pro (長文対応)' },
+    { value: 'gemini-1.5-flash', label: 'gemini-1.5-flash (旧世代標準)' },
+  ];
+
+  const currentModel = formData.geminiModel || 'gemini-3.7-flash';
+  const isKnownPreset = PRESET_MODELS.some((m) => m.value === currentModel);
+  const [isCustomMode, setIsCustomMode] = React.useState(!isKnownPreset && Boolean(currentModel));
+
+  const handleModelSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value;
+    if (val === '__custom__') {
+      setIsCustomMode(true);
+    } else {
+      setIsCustomMode(false);
+      setFormData((prev) => ({ ...prev, geminiModel: val }));
+    }
+  };
+
+  const handleCustomModelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setFormData((prev) => ({ ...prev, geminiModel: val }));
+  };
+
   const handleTestConnection = async () => {
     const apiKey = formData.geminiApiKey?.trim();
-    const model = formData.geminiModel || 'gemini-3.6-flash';
+    const model = formData.geminiModel || 'gemini-3.7-flash';
     const baseUrl = (formData.geminiBaseUrl?.trim() || 'https://generativelanguage.googleapis.com').replace(/\/+$/, '');
     const testedAt = getFormattedNow();
 
@@ -178,19 +209,54 @@ export const AiTab: React.FC<AiTabProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
           {/* モデル選択 Listbox */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-              使用AIモデル
-            </label>
-            <select
-              value={formData.geminiModel || 'gemini-3.6-flash'}
-              onChange={(e) => setFormData((prev) => ({ ...prev, geminiModel: e.target.value }))}
-              className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
-            >
-              <option value="gemini-3.6-flash">gemini-3.6-flash (標準・爆速)</option>
-              <option value="gemini-3.6-pro">gemini-3.6-pro (高精度要約)</option>
-              <option value="gemini-2.5-flash">gemini-2.5-flash (軽量安定)</option>
-              <option value="gemini-1.5-pro">gemini-1.5-pro (長文対応)</option>
-            </select>
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                使用AIモデル
+              </label>
+              {isCustomMode && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsCustomMode(false);
+                    setFormData((prev) => ({ ...prev, geminiModel: 'gemini-3.7-flash' }));
+                  }}
+                  className="text-[11px] text-sky-500 hover:text-sky-600 underline"
+                >
+                  プリセット選択に戻す
+                </button>
+              )}
+            </div>
+
+            {!isCustomMode ? (
+              <select
+                value={isKnownPreset ? currentModel : '__custom__'}
+                onChange={handleModelSelectChange}
+                className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
+              >
+                {PRESET_MODELS.map((m) => (
+                  <option key={m.value} value={m.value}>
+                    {m.label}
+                  </option>
+                ))}
+                <option value="__custom__">⚙️ カスタム指定（直接手入力...）</option>
+              </select>
+            ) : (
+              <div className="space-y-1">
+                <input
+                  type="text"
+                  value={formData.geminiModel || ''}
+                  onChange={handleCustomModelChange}
+                  placeholder="例: gemini-3.7-flash, gemini-exp-1206..."
+                  className="w-full px-3 py-2 text-sm font-mono bg-white dark:bg-slate-900 border border-sky-400 dark:border-sky-500 rounded-lg text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
+                />
+                <p className="text-[11px] text-slate-400">
+                  新モデルや社内プロキシ用モデル名を直接指定できます
+                </p>
+              </div>
+            )}
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 leading-tight">
+              💡 通常のメモ要約には <strong>3.7 Flash</strong> または <strong>2.0 Flash</strong> が最も高速・高精度です（1.5系は主に社内承認等の互換用）。
+            </p>
           </div>
 
           {/* Base URL */}

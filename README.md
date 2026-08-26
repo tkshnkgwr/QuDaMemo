@@ -1,6 +1,6 @@
 # QuDaMemo (Quick Daily Memo)
 
-[![Version](https://img.shields.io/badge/version-1.0.8-blue.svg)](package.json)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](package.json)
 [![Tauri](https://img.shields.io/badge/tauri-v2-blue.svg)](https://v2.tauri.app/)
 [![React](https://img.shields.io/badge/react-19-61dafb.svg)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/typescript-5.8-blue.svg)](https://www.typescriptlang.org/)
@@ -20,7 +20,7 @@
 
 - **⚡ Ultra-fast Daily Memoing**: Automatic file naming (`YYYYMMDD.md`), automated YAML frontmatter insertion, and holiday detection.
 - **✨ Frameless Minimal UI**: Modern frameless (`decorations: false`), transparent, low-resource desktop window.
-- **🤖 AI Summary Engine**: Customizable Gemini models (`gemini-3.6-flash`, `gemini-3.6-pro`, etc.) with custom prompt rules.
+- **🤖 AI Summary Engine**: Support for cutting-edge Gemini models (`gemini-3.7-flash`, `gemini-3.6-pro`, `gemini-2.0-flash`, etc.) and custom model name input with customizable prompt rules.
 - **📁 Obsidian / Markdown Compatibility**: Native Markdown storage, custom YAML metadata management.
 - **🪶 Low CPU & Memory Optimization**: Minimal CPU/RAM overhead tailored for low-spec PCs.
 
@@ -29,6 +29,7 @@
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - [Node.js](https://nodejs.org/) (v18+)
 - [Rust](https://www.rust-lang.org/) (v1.80+)
 

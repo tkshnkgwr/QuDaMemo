@@ -160,7 +160,7 @@ export const MemoEditor: React.FC<MemoEditorProps> = ({
 
     const mode = settings.activeSummaryMode || 'api';
     const apiKey = settings.geminiApiKey?.trim();
-    const modelName = settings.geminiModel?.trim() || 'gemini-3.6-flash';
+    const modelName = settings.geminiModel?.trim() || 'gemini-3.7-flash';
     const customPrompt = settings.summaryRule?.trim() || '30〜50文字程度で本日のメモの主要な出来事・タスク・決定事項を簡潔に要約してください。要約本文のみを出力してください。';
     const baseUrl = settings.geminiBaseUrl?.trim();
 

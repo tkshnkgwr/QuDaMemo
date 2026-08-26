@@ -112,6 +112,21 @@ export const AppOverviewModal: React.FC<AppOverviewModalProps> = ({ onClose }) =
               <li>環境設定 (<code>Ctrl + ,</code>) で保存先フォルダや祝日、AI要約モードをカスタマイズ。</li>
             </ol>
           </div>
+
+          {/* AI Model Selection Guide */}
+          <div className="p-3.5 rounded-xl bg-purple-50/60 dark:bg-purple-950/40 border border-purple-200/60 dark:border-purple-800/40 space-y-2">
+            <div className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-purple-500" />
+              <span>💡 AI要約モデル選びのヒント</span>
+            </div>
+            <p className="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
+              日々のメモ要約においては、最新の <strong><code>gemini-3.7-flash</code></strong> が最も高速・高精度でおすすめです。
+            </p>
+            <ul className="list-disc list-inside space-y-1 text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
+              <li><strong>3.7 Flash / 2.0 Flash</strong>: 思考推論と圧倒的なレスポンス速度を両立（普段使いに最適）。</li>
+              <li><strong>1.5 系 (1.5 Pro/Flash)</strong>: 旧世代モデル。200万トークンの超長文処理や社内プロキシ等で承認モデルが固定されている環境向けの後方互換用途です。日常メモでは 3.7 Flash の方が高速かつ高品質です。</li>
+            </ul>
+          </div>
         </div>
 
         {/* Modal Footer */}

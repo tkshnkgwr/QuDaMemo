@@ -3,12 +3,14 @@
 [English Version](../en/DEVELOPMENT.md) | **日本語版**
 
 ## 1. 開発環境要件
+
 - **Node.js**: v18.0.0 以上
 - **Rust**: v1.80.0 以上 (Tauri v2 用)
 - **パッケージマネージャ**: npm
 
 ## 2. ディレクトリ構造
-```
+
+```text
 .
 ├── .agents/                 # AI エージェント用開発指示書 (AGENTS.md)
 ├── src/                     # React 19 / TypeScript フロントエンド

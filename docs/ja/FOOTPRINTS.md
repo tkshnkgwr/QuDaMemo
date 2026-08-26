@@ -1,12 +1,18 @@
 # リソース計測 (FOOTPRINTS.md) - QuDaMemo
 
+[English Version](../en/FOOTPRINTS.md) | **日本語版**
+
 低リソース環境（スペックの限られた Windows PC 等）での動作実績データです。
 
 ## 1. メモリフットプリント (RAM Usage)
-- **Node.js Express Server**: 約 35 MB
-- **ブラウザ UI レンダリング (Vite/React)**: 約 45 MB
-- **合計メモリ消費**: **80 MB 未満**
+
+- **Tauri v2 Rust バックエンド**: 約 10〜15 MB
+- **WebView2 フロントエンド (React 19 / Vite)**: 約 45〜65 MB
+- **合計メモリ消費**: **80 MB 未満（アイドル時）**
 
 ## 2. 描画・CPU負荷
-- **インターバル制限**: 描画更新を 1秒に1回 に制御し、アイドリング時の CPU 使用率を 1% 未満に抑維持。
-- **将来的 Rust (egui/eframe) 移植時の目標**: メモリ消費 15MB 以下、起動時間 50ms 以下。
+
+- **インターバル制限**: アイドル時の定期更新を 1秒に1回 に抑制し、CPU 使用率を 1% 未満に維持。
+- **最適化ビルド設定**: `opt-level = 'z'`, `lto = true`, `codegen-units = 1`, `strip = true` によりバイナリサイズおよびランタイム負荷を最小化。
+
+

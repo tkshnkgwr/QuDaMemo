@@ -1,12 +1,18 @@
 # Resource Metrics (FOOTPRINTS.md) - QuDaMemo
 
-Resource consumption performance metrics on low-spec systems:
+**English Version** | [日本語版](../ja/FOOTPRINTS.md)
 
-## 1. Memory Usage
-- **Express Backend**: ~35 MB
-- **Vite/React UI**: ~45 MB
-- **Total Combined**: **< 80 MB**
+Resource consumption performance metrics on low-spec Windows environments:
+
+## 1. Memory Footprint (RAM Usage)
+
+- **Tauri v2 Rust Backend**: ~10–15 MB
+- **WebView2 Frontend (React 19 / Vite)**: ~45–65 MB
+- **Total Combined**: **< 80 MB (at idle)**
 
 ## 2. CPU & Rendering
-- **Re-render Throttling**: Limited to 1Hz rendering interval. Idle CPU usage < 1%.
-- **Future Rust Native Target**: RAM < 15MB, Startup time < 50ms.
+
+- **Update Throttling**: Background/idle polling throttled to 1Hz. Idle CPU usage < 1%.
+- **Release Profile Optimization**: Minimized binary size and runtime overhead via `opt-level = 'z'`, `lto = true`, `codegen-units = 1`, and `strip = true`.
+
+

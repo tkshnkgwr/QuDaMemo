@@ -6,3 +6,4 @@ QuDaMemo utilizes a decoupled architecture combining **Vite + React 19** fronten
 
 - **Frontend**: Lightweight React UI components for note management and frontmatter handling.
 - **Backend (src-tauri)**: Window management (frameless, transparent), native OS interactions.
+

@@ -4,18 +4,64 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] - 2026-08-20
+
+### Added & Improved
+
+- **Expanded AI Model Support with Gemini 3.7 Flash**:
+  - Added full support for **`gemini-3.7-flash`** (Hybrid reasoning & ultra-fast model) as the default AI summarization model.
+  - Added preset options for `gemini-2.5-pro`, `gemini-2.0-flash`, `gemini-2.0-flash-lite`, and `gemini-1.5-flash`.
+- **Custom AI Model Manual Input Mode**:
+  - Added capability to manually type and specify custom/preview model names or internal proxy model identifiers directly within Settings.
+  - Seamless switching UI between preset models and custom input mode.
+- **AI Model Selection Guidance & Tips**:
+  - Integrated model selection guidance and generation differences (3.7 Flash vs 1.5 Series) into the App Overview & Guide modal (`AppOverviewModal`), Settings (`AiTab`), and User Guide documentation (`USER_GUIDE.md`).
+
+---
+
 ## [1.0.9] - 2026-08-10
 
 ### Fixed & Improved
+
 - **Absolute Path Persistence & Rust Native Storage for Config (`config.json`)**:
   - Upgraded config file storage path from relative path (`./config.json`) to an absolute path (`Documents/QuDaMemo/config.json`).
   - Added Rust native commands (`save_app_config` / `load_app_config`) to ensure 100% reliable physical write/read irrespective of working directory or permission constraints.
   - Added safe startup merge logic so that Gemini API keys and settings are permanently restored even across installer re-runs or WebView2 cache resets.
   - Implemented automatic dual backup saving to `storagePath/config.json`.
 
+---
+
+## [1.0.8] - 2026-08-07
+
+### Added & Improved
+
+- **Physical Storage, Restoration & Synchronization of `config.json`**:
+  - Implemented synchronization of `AppSettings` to physical `./config.json` (and target storage path) in addition to browser LocalStorage.
+- **Auto-Recording of `updated_at` in YAML Frontmatter**:
+  - Automatically records `updated_at` timestamps on note creation, editing, and AI summarization. Displays non-editable update timestamp badge in editor header.
+- **Calendar Enhancements & Custom Holiday Management**:
+  - Externalized Japanese holiday definitions and added UI in Settings for user-defined custom holiday management.
+  - Dynamic tooltip tracking to mouse cursor position (`e.clientX`, `e.clientY`) in weekly calendar.
+- **View State Retention & Navigation Memory**:
+  - Retains view state (Month calendar, Week calendar, or Standard List) when opening/closing editor.
+  - Default search date range set to current month (1st to last day).
+- **Independent App Overview & Guide Modal (`AppOverviewModal`)**:
+  - Separated App Overview & Usage Guide modal from Keyboard Shortcuts modal.
+- **Dark Mode Scrollbars & UI Styles**:
+  - Configured dark-mode scrollbars (`color-scheme: dark`, `::-webkit-scrollbar`) across lists and dialogs.
+  - Added note clarifying physical `.md` files remain untouched when clearing cache.
+- **SettingsModal Refactoring**:
+  - Decomposed 1,400-line monolithic settings modal into lightweight `SettingsModal.tsx` (~200 lines) and 5 focused sub-tab components (`GeneralTab`, `AiTab`, `ThemeTab`, `HolidaysTab`, `BackupTab`).
+- **CI Workflow Optimization (`ci.yml`)**:
+  - Integrated `Swatinem/rust-cache@v2` for Rust dependency caching on Windows.
+  - Removed duplicate `npm ci` build steps.
+
+---
+
 ## [1.0.3] - 2026-08-05
 
 ### Added & Improved
+
 - **QuMaEditor-Compliant List-Style Theme Dropdown Menu**:
   - Replaced theme toggle button with a list dropdown menu (Light / Dark / System) with active checkmark indicators.
 - **QuMaEditor-Compliant List-Style Help Dropdown Menu**:

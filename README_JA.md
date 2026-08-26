@@ -1,6 +1,6 @@
 # QuDaMemo (Quick Daily Memo) - 日本語概要
 
-[![Version](https://img.shields.io/badge/version-1.0.8-blue.svg)](package.json)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](package.json)
 [![Tauri](https://img.shields.io/badge/tauri-v2-blue.svg)](https://v2.tauri.app/)
 [![React](https://img.shields.io/badge/react-19-61dafb.svg)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/typescript-5.8-blue.svg)](https://www.typescriptlang.org/)
@@ -20,7 +20,7 @@
 
 - **⚡ 超高速デイリーメモ管理**: 自動ファイル命名 (`YYYYMMDD.md`)、Frontmatter自動付与、祝日判定。
 - **✨ 枠なしモダンUI**: 背景透過・枠なし (`decorations: false`) の洗練されたデスクトップウィンドウ。
-- **🤖 AI要約機能**: カスタマイズ可能なGeminiモデル（`gemini-3.6-flash`, `gemini-3.6-pro` 等）およびカスタムプロンプト（要約ルール）の設定。
+- **🤖 AI要約機能**: 最新のGeminiモデル（`gemini-3.7-flash`, `gemini-3.6-pro`, `gemini-2.0-flash` 等）のプリセット選択やカスタムモデルの手動入力、および自由な要約プロンプト（ルール）の設定。
 - **📁 Obsidian互換**: 標準Markdown形式、frontmatterの柔軟なカスタマイズ。
 - **🪶 低リソース最適化**: 低メモリ/CPU消費で快適に動作。
 
@@ -29,6 +29,7 @@
 ## 🚀 開発・起動手順
 
 ### 必須環境
+
 - [Node.js](https://nodejs.org/) (v18以上)
 - [Rust](https://www.rust-lang.org/) (v1.80以上)
 

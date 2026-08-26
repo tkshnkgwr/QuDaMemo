@@ -39,7 +39,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   configFilePath: 'C:\\Users\\632792\\Documents\\QuDaMemo\\config.json',
   fileNameRule: 'YYYYMMDD.md',
   summaryRule: '30〜50文字程度で本日のメモの主要な出来事・タスク・決定事項を簡潔に要約してください。挨拶やプレフィックス（「要約：」等）は含めず、要約本文のみを出力してください。',
-  geminiModel: 'gemini-3.6-flash',
+  geminiModel: 'gemini-3.7-flash',
   geminiApiKey: '',
   geminiBaseUrl: 'https://generativelanguage.googleapis.com',
   activeSummaryMode: 'api',
