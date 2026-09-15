@@ -29,6 +29,17 @@
 - [x] Tauri v2 パッケージング・ビルド検証
 - [ ] バックグラウンド常駐タスクバーインジケーターのネイティブIPC検証
 
+### v1.1.1 リリース版 (2026-09-15)
+
+- [x] **保存先パス・設定ファイルパスの環境変数 (%USERPROFILE%) 統一 (`Storage / Config`)**:
+  - デフォルト保存先パス (`%USERPROFILE%\Documents\QuDaMemo\notes`) および設定ファイルパス (`%USERPROFILE%\Documents\QuDaMemo\config.json`) を環境変数形式に統一し、環境依存・ユーザー名ハードコードを完全排除。
+- [x] **高速化 ＆ Rust ネイティブ化ロードマップの策定 (`Performance / Rust`)**:
+  - `load_all_memos` の Rayon マルチスレッド並列化、Rust ネイティブ全文検索、`notify` による OS カーネル直結の差分ホットリロード、ZIP バックアップ等の次期改善仕様を策定・明記。
+- [x] **大賢者エージェント開発ルール ＆ スキル定義の標準化 (`Rules / Skills`)**:
+  - RULES.md、GEMINI.md、AGENTS.md、および各種スキル (`git-commit`, `markdown-table`, `tauri-verification`) をプロジェクト共通規格として完全整備。
+- [x] **Cargo 依存関係の整合性向上 (`Build / Cargo`)**:
+  - `Cargo.lock` の `cc` クレートバージョンを更新し、Rust バックエンドビルドの安定性を強化。
+
 
 ### 今後の追加検討課題
 

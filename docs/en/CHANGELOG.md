@@ -4,6 +4,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.1] - 2026-09-15
+
+### Improved & Optimized
+- **Unified Path Configurations with %USERPROFILE% Environment Variable**:
+  - Unified default note storage path (`%USERPROFILE%\Documents\QuDaMemo\notes`) and configuration file path (`%USERPROFILE%\Documents\QuDaMemo\config.json`) using environment variable format to eliminate hardcoded user directory dependencies.
+- **Performance & Native Rust Optimization Roadmap**:
+  - Formulated and documented future native optimization roadmap items in TODO, including Rayon multi-threaded loading, native full-text search, `notify`-based hot reloading, and zip backup archives.
+- **Standardized AI Agent Rules & Skill Definitions**:
+  - Fully established RULES.md, GEMINI.md, AGENTS.md, and skill modules (`git-commit`, `markdown-table`, `tauri-verification`) as project standards.
+- **Enhanced Cargo Dependency Reliability**:
+  - Updated `cc` crate version in `Cargo.lock` to ensure solid compilation across all platforms.
+
 ## [1.1.0] - 2026-08-26
 
 ### Added & Improved

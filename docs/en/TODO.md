@@ -29,6 +29,17 @@
 - [x] Tauri v2 packaging and production build verification
 - [ ] Native system tray indicator IPC verification
 
+### v1.1.1 Release (2026-09-15)
+
+- [x] **Unified Path Configurations with %USERPROFILE% Environment Variable (`Storage / Config`)**:
+  - Replaced hardcoded paths with `%USERPROFILE%` variable for default note storage and config paths.
+- [x] **Performance & Native Rust Optimization Roadmap (`Performance / Rust`)**:
+  - Detailed Rayon multi-threaded scanning, native full-text search, `notify`-based hot reloading, and zip backup architectures.
+- [x] **Standardized AI Agent Rules & Skill Definitions (`Rules / Skills`)**:
+  - Completely set up RULES.md, GEMINI.md, AGENTS.md, and skill modules (`git-commit`, `markdown-table`, `tauri-verification`).
+- [x] **Enhanced Cargo Dependency Reliability (`Build / Cargo`)**:
+  - Updated `cc` crate in `Cargo.lock` to ensure solid compilation.
+
 ### Future Backlog
 
 #### 🚀 Performance & Native Rust

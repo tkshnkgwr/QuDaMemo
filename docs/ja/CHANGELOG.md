@@ -4,6 +4,18 @@
 
 すべての重要な変更は本ドキュメントに記録されます。
 
+## [1.1.1] - 2026-09-15
+
+### 改善 ＆ 最適化 (Improved & Optimized)
+- **保存先パス・設定ファイルパスの環境変数 (%USERPROFILE%) 統一**:
+  - デフォルト保存先パス (`%USERPROFILE%\Documents\QuDaMemo\notes`) および設定ファイルパス (`%USERPROFILE%\Documents\QuDaMemo\config.json`) を環境変数形式に統一し、環境依存やユーザー名ハードコードを完全排除。
+- **高速化 ＆ Rust ネイティブ化ロードマップの策定**:
+  - `load_all_memos` の Rayon マルチスレッド並列化、Rust ネイティブ全文検索、`notify` による OS カーネル直結の差分ホットリロード、ZIP バックアップ等の次期改善仕様を TODO に策定・明記。
+- **大賢者エージェント開発ルール ＆ スキル定義の標準化**:
+  - RULES.md、GEMINI.md、AGENTS.md、および各種スキル (`git-commit`, `markdown-table`, `tauri-verification`) をプロジェクト共通規格として完全整備。
+- **Cargo 依存関係の整合性向上**:
+  - `Cargo.lock` の `cc` クレートバージョンを更新し、Rust バックエンドビルドの安定性を強化。
+
 ## [1.1.0] - 2026-08-26
 
 ### 追加 ＆ 改善 (Added & Improved)
