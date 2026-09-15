@@ -17,7 +17,7 @@ This document contains extended development and operational guidelines for AI Ag
 ## 2. Quality Control & Verification Procedures
 
 - **Code Quality Checks**:
-  - Run checks whenever source code (`*.ts`, `*.tsx`, `*.rs`, `Cargo.toml`, etc.) is modified:
+  - Run checks whenever source code (`*.ts`, `*.tsx`, `*.rs`, `Cargo.toml`, etc.) is modified (**※Skip all Rust/frontend checks like `cargo check`, `cargo test`, `cargo fmt`, `npm run build` when modifying only Markdown/documentation files to complete promptly**):
   - `npm run lint`: Confirm zero TypeScript type errors.
   - `npm run test`: Confirm all unit tests pass.
   - `npm run build`: Confirm Vite frontend bundle succeeds.

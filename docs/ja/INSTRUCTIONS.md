@@ -17,7 +17,7 @@
 
 ## 2. 品質管理・検証手順
 - **コード品質チェック**:
-  - プログラムソース (`*.ts`, `*.tsx`, `*.rs`, `Cargo.toml` 等) に修正があった場合のみ以下を実行します（**※Markdown / ドキュメントのみの修正時は `cargo fmt` や `cargo check` 等を一切スキップして即座に完了**）。
+  - プログラムソース (`*.ts`, `*.tsx`, `*.rs`, `Cargo.toml` 等) に修正があった場合のみ以下を実行します（**※Markdown / ドキュメントのみの修正時は `cargo fmt` / `cargo check` / `cargo test` / `npm run build` 等を一切スキップして即座に完了**）。
   - `npm run lint`: TypeScript 型チェックエラーゼロを確認します。
   - `npm run build`: Vite フロントエンドビルドが成功することを確認します。
   - `cargo check --manifest-path src-tauri/Cargo.toml`: Tauri バックエンド Rust の正常性を確認します。

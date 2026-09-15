@@ -45,7 +45,7 @@
   - 全一覧およびコンポーネントのスクロールバーをダークモード仕様 (`color-scheme: dark`, `::-webkit-scrollbar`) に調整。
   - 設定画面のキャッシュクリア時に「物理 `.md` ファイルは削除されない」旨の注意事項カードを明記。
 - **`SettingsModal` のモジュール分割リファクタリング**:
-  - 1,000行を超過していた巨大設定画面コンポーネント（約 1,400 行）を、親モーダル [`SettingsModal.tsx`](file:///c:/Users/632792/Documents/%E8%87%AA%E4%BD%9C/QuDaMemo/src/components/SettingsModal.tsx)（約 200 行の軽量構造）と 5 つのサブコンポーネント (`GeneralTab`, `AiTab`, `ThemeTab`, `HolidaysTab`, `BackupTab`) へ完全分割・最適化。
+  - 1,000行を超過していた巨大設定画面コンポーネント（約 1,400 行）を、親モーダル [`SettingsModal.tsx`](../../src/components/SettingsModal.tsx)（約 200 行の軽量構造）と 5 つのサブコンポーネント (`GeneralTab`, `AiTab`, `ThemeTab`, `HolidaysTab`, `BackupTab`) へ完全分割・最適化。
 - **CI ワークフローの最適化 (`ci.yml`)**:
   - `rust-tauri` チェックジョブ（`windows-latest`）に `Swatinem/rust-cache@v2` を導入し、依存クレートのビルドキャッシュを有効化。
   - 重複していた不要な `npm ci` ステップを削除し処理時間を短縮。
@@ -141,7 +141,7 @@
 - **「閉じる＆一覧へ」の待ち時間 0 秒化 ＆ バックグラウンド非同期 AI 要約**:
   - ボタンクリック時、`await` 通信待機を行わず即座に一覧画面へ復帰。AI要約処理はバックグラウンドで非同期実行され、完了後に物理ファイルを全自動更新。
 - **設定済みフォルダ優先のダイアログ起動**:
-  - 「参照...」ボタンクリック時、前回開いた場所ではなく現在設定画面に入力されているローカルパス（例: `C:\Users\632792\Documents\QuDaMemo\notes`）を直接初期表示してダイアログを開くよう改善。
+  - 「参照...」ボタンクリック時、前回開いた場所ではなく現在設定画面に入力されているローカルパス（例: `%USERPROFILE%\Documents\QuDaMemo\notes`）を直接初期表示してダイアログを開くよう改善。
 - **物理ファイル保存先 ＆ ログローテーションシステム**:
   - 実在するローカルパス `C:\Users\<ユーザー名>\Documents\QuDaMemo\notes` へデフォルト保存先を自動補正。
   - ログ出力先 `[storagePath]/logs/qudamemo.log` での 500KB 超過時 3世代（`qudamemo.log`, `qudamemo.log.1`, `qudamemo.log.2`）自動シフトローテーション機構。

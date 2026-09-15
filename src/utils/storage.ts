@@ -16,11 +16,11 @@ const STORAGE_KEY_NOTES = 'qudamemo_notes_v1';
 const STORAGE_KEY_SETTINGS = 'qudamemo_settings_v1';
 
 /**
- * storagePath（例: C:\Users\632792\Documents\QuDaMemo\notes）から
- * 安全な絶対設定ファイルパス（例: C:\Users\632792\Documents\QuDaMemo\config.json）を導出する
+ * storagePath（例: %USERPROFILE%\Documents\QuDaMemo\notes）から
+ * 安全な絶対設定ファイルパス（例: %USERPROFILE%\Documents\QuDaMemo\config.json）を導出する
  */
 export function resolveDefaultConfigPath(storagePath?: string): string {
-  const defaultDir = 'C:\\Users\\632792\\Documents\\QuDaMemo';
+  const defaultDir = '%USERPROFILE%\\Documents\\QuDaMemo';
   if (!storagePath || !storagePath.trim()) {
     return `${defaultDir}\\config.json`;
   }
@@ -35,8 +35,8 @@ export function resolveDefaultConfigPath(storagePath?: string): string {
 
 // UPDATE [2026-08-10]: 実在するマイドキュメント配下の QuDaMemo/notes をデフォルトローカル保存先パス、QuDaMemo/config.json を設定ファイルパスに設定
 export const DEFAULT_SETTINGS: AppSettings = {
-  storagePath: 'C:\\Users\\632792\\Documents\\QuDaMemo\\notes',
-  configFilePath: 'C:\\Users\\632792\\Documents\\QuDaMemo\\config.json',
+  storagePath: '%USERPROFILE%\\Documents\\QuDaMemo\\notes',
+  configFilePath: '%USERPROFILE%\\Documents\\QuDaMemo\\config.json',
   fileNameRule: 'YYYYMMDD.md',
   summaryRule: '30〜50文字程度で本日のメモの主要な出来事・タスク・決定事項を簡潔に要約してください。挨拶やプレフィックス（「要約：」等）は含めず、要約本文のみを出力してください。',
   geminiModel: 'gemini-3.7-flash',

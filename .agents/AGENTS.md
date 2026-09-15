@@ -1,13 +1,16 @@
-# AI Agent Development Guidelines for QuDaMemo (AGENTS.md)
+# QuDaMemo 開発ガイドライン (AGENTS.md)
 
 本プロジェクトにおける大賢者の開発指示書です。
-最優先ルール（コミット禁止・テーブル整列等）は [GEMINI.md](../GEMINI.md) を参照してください。
+最優先ルール（コミット禁止・テーブル整列等）は [RULES.md](../RULES.md) および [GEMINI.md](../GEMINI.md) を参照してください。
 
 ## 🎯 開発・品質ルール
 
 - **技術解説への配慮**:
-  - ボスの他言語経験を尊重し、Rust/React/TypeScript 固有概念（所有権、ライフタイム、フック等）は一般的なプログラミング概念に置き換えて分かりやすく補足解説を添えること。
-- **事前検証とドキュメント同期**:
-  - 開発およびドキュメント更新の際は、必ず [`docs/ja/INSTRUCTIONS.md`](../docs/ja/INSTRUCTIONS.md) に記載されている「ドキュメント自動同期ルール」および「品質管理・検証手順」に厳格に従って検証・同期を行うこと。
+  - ボスの他言語経験を尊重し、専門用語は分かりやすい一般的概念に置き換えて解説すること。
+- **事前検証とスキル委譲**:
+  - コード変更時は [.agents/skills/tauri-verification/SKILL.md](file:///.agents/skills/tauri-verification/SKILL.md) を実行すること。
+  - Markdown（`*.md`）のみの編集時は事前検証を省略すること。
 - **コード規模とリファクタリング**:
-  - 単一ソース (`*.ts`, `*.tsx`, `*.rs`) が 1,000 行を超えた場合はモジュール分割リファクタリングを積極的に提案・推進すること。
+  - 単一ソースが1000行を超えた場合はモジュール分割リファクタリングを積極的に提案すること。
+- **コミット手順（スキル委譲）**:
+  - ボスから指示があった場合のみ、[.agents/skills/git-commit/SKILL.md](file:///.agents/skills/git-commit/SKILL.md) に従って実行すること。
