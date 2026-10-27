@@ -4,6 +4,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.3] - 2026-10-27
+
+### Changed
+- **Software License Transition to GPL-3.0-or-later**:
+  - Migrated project license from MIT License to **GNU General Public License v3.0 or later (`GPL-3.0-or-later`)**.
+  - Updated `LICENSE` text to GPL v3, and synchronized license metadata and status badges across `package.json`, `Cargo.toml`, `README.md`, and `README_JA.md`.
+
 ## [1.1.2] - 2026-10-27
 
 ### Improved & Optimized

@@ -4,6 +4,13 @@
 
 すべての重要な変更は本ドキュメントに記録されます。
 
+## [1.1.3] - 2026-10-27
+
+### 変更 (Changed)
+- **ソフトウェアライセンスの変更 (GPL-3.0-or-later)**:
+  - プロジェクトのライセンスを MIT License から **GNU General Public License v3.0 or later (`GPL-3.0-or-later`)** へ移行。
+  - `LICENSE` ファイルを GPL v3 フルテキストに刷新し、`package.json`、`Cargo.toml`、`README.md`、`README_JA.md` のライセンス定義およびバッジ表示を同期更新。
+
 ## [1.1.2] - 2026-10-27
 
 ### 改善 ＆ 最適化 (Improved & Optimized)

@@ -1,11 +1,11 @@
 # QuDaMemo (Quick Daily Memo) - 日本語概要
 
-[![Version](https://img.shields.io/badge/version-1.1.2-blue.svg)](package.json)
+[![Version](https://img.shields.io/badge/version-1.1.3-blue.svg)](package.json)
 [![Tauri](https://img.shields.io/badge/tauri-v2-blue.svg)](https://v2.tauri.app/)
 [![React](https://img.shields.io/badge/react-19-61dafb.svg)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/typescript-5.8-blue.svg)](https://www.typescriptlang.org/)
 [![Rust](https://img.shields.io/badge/rust-1.80%2B-orange.svg)](https://www.rust-lang.org/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](#ライセンス)
+[![License](https://img.shields.io/badge/license-GPL--3.0--or--later-blue.svg)](#ライセンス)
 
 > 低リソース環境 (スペックの限られたPC) に最適化された、超高速・軽量なデイリーMarkdownメモ＆AI要約デスクトップアプリケーション。Tauri v2、Vite、React 19、および Rust により構築されています。
 
@@ -54,4 +54,4 @@ npx tauri build
 
 ## 📄 ライセンス
 
-本プロジェクトは MIT License のもとで公開されています - Copyright (c) 2026 tkshnkgwr。詳細は [LICENSE](LICENSE) をご覧ください。
+本プロジェクトは GNU General Public License v3.0 or later (GPL-3.0-or-later) のもとで公開されています - Copyright (c) 2026 tkshnkgwr。詳細は [LICENSE](LICENSE) をご覧ください。

@@ -1,11 +1,11 @@
 # QuDaMemo (Quick Daily Memo)
 
-[![Version](https://img.shields.io/badge/version-1.1.2-blue.svg)](package.json)
+[![Version](https://img.shields.io/badge/version-1.1.3-blue.svg)](package.json)
 [![Tauri](https://img.shields.io/badge/tauri-v2-blue.svg)](https://v2.tauri.app/)
 [![React](https://img.shields.io/badge/react-19-61dafb.svg)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/typescript-5.8-blue.svg)](https://www.typescriptlang.org/)
 [![Rust](https://img.shields.io/badge/rust-1.80%2B-orange.svg)](https://www.rust-lang.org/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](#license)
+[![License](https://img.shields.io/badge/license-GPL--3.0--or--later-blue.svg)](#license)
 
 > Low-resource targeted Daily Markdown Note desktop application powered by Tauri v2, Vite, React 19, and Rust. Engineered for ultra-fast, lightweight daily memoing and AI-assisted summaries.
 
@@ -54,4 +54,4 @@ npx tauri build
 
 ## 📄 License
 
-This project is licensed under the MIT License - Copyright (c) 2026 tkshnkgwr. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the GNU General Public License v3.0 or later (GPL-3.0-or-later) - Copyright (c) 2026 tkshnkgwr. See the [LICENSE](LICENSE) file for details.
