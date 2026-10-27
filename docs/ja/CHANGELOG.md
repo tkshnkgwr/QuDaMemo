@@ -4,6 +4,17 @@
 
 すべての重要な変更は本ドキュメントに記録されます。
 
+## [1.1.2] - 2026-10-27
+
+### 改善 ＆ 最適化 (Improved & Optimized)
+- **ドキュメント内パス環境変数化の徹底**:
+  - `docs/ja/CHANGELOG.md` 内の設定ファイル絶対パス記述を、RULES.md（環境変数化原則）に基づき `%USERPROFILE%\Documents\QuDaMemo\config.json` に統一。
+- **README ドキュメントおよびライセンス表記の整備**:
+  - `README.md` および `README_JA.md` における機能概要・開発起動手順を復元し、LICENSEファイルへの詳細リンク表記を最適化。
+- **ワークスペース開発ルールおよびスキルの拡充**:
+  - `RULES.md` および `GEMINI.md` に高速CLIツール（`ripgrep` / `fd` / `jq`）の標準利用原則を追記。
+  - Obsidian Vault 一時メモ自動保存スキル（`vault-memo`）を新規配備し、スキル一覧テーブルに登録。
+
 ## [1.1.1] - 2026-09-15
 
 ### 改善 ＆ 最適化 (Improved & Optimized)
@@ -33,7 +44,7 @@
 
 ### 修正 ＆ 改善 (Fixed & Improved)
 - **設定ファイル (`config.json`) の絶対パス物理永続化 ＆ Rust ネイティブ保存・復元エンジン導入**:
-  - 設定ファイル保存先を相対パス (`./config.json`) から確実な絶対パス (`C:\Users\...\Documents\QuDaMemo\config.json`) へ昇格・確定。
+  - 設定ファイル保存先を相対パス (`./config.json`) から確実な絶対パス (`%USERPROFILE%\Documents\QuDaMemo\config.json`) へ昇格・確定。
   - メモ保存と同様に Rust ネイティブコマンド (`save_app_config` / `load_app_config`) を実装し、実行カレントディレクトリやパーミッション制限に左右されず 100% 確実に書き込み・読み込みが行われるよう強化。
   - アプリ起動時に物理 `config.json` から設定・APIキーを優先復元する安全マージロジックを追加し、インストーラ起動やWebView2キャッシュクリア時でも API キーが初期化されない永続性を確立。
   - メモ保存先直下 (`storagePath/config.json`) への自動二重バックアップ保存を実装。

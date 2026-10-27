@@ -4,6 +4,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.2] - 2026-10-27
+
+### Improved & Optimized
+- **Complete Path Variable Harmonization in Documentation**:
+  - Unified configuration file path in documentation to use `%USERPROFILE%\Documents\QuDaMemo\config.json`, adhering strictly to RULES.md environment variable standards.
+- **README Documentation & License Synchronization**:
+  - Restored Key Features and Quick Start workflows in README files, updating the license notice with an explicit reference to the LICENSE file.
+- **Enhanced Workspace Rules & Skills**:
+  - Added fast CLI tool principles (`ripgrep` / `fd` / `jq`) to `RULES.md` and `GEMINI.md`.
+  - Added new `vault-memo` skill for automated fleeting note capture into Obsidian Vault.
+
 ## [1.1.1] - 2026-09-15
 
 ### Improved & Optimized

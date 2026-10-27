@@ -1,6 +1,6 @@
 # QuDaMemo (Quick Daily Memo) - 日本語概要
 
-[![Version](https://img.shields.io/badge/version-1.1.1-blue.svg)](package.json)
+[![Version](https://img.shields.io/badge/version-1.1.2-blue.svg)](package.json)
 [![Tauri](https://img.shields.io/badge/tauri-v2-blue.svg)](https://v2.tauri.app/)
 [![React](https://img.shields.io/badge/react-19-61dafb.svg)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/typescript-5.8-blue.svg)](https://www.typescriptlang.org/)
@@ -53,4 +53,5 @@ npx tauri build
 ---
 
 ## 📄 ライセンス
-MIT License
+
+本プロジェクトは MIT License のもとで公開されています - Copyright (c) 2026 tkshnkgwr。詳細は [LICENSE](LICENSE) をご覧ください。
