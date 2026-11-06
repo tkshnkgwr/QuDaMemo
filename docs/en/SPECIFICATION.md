@@ -4,6 +4,7 @@
 
 ## 1. Application Overview
 QuDaMemo is an ultra-fast, lightweight daily Markdown note desktop application built with Tauri v2, React 19, TypeScript, and Rust, optimized for high performance even on lower-spec PC environments.
+This software is open-source under the **GNU General Public License v3.0 or later (`GPL-3.0-or-later`)**.
 
 ---
 
@@ -56,6 +57,17 @@ export interface MemoFrontmatter {
   summary_type?: string;
 }
 
+export interface QuickMemo {
+  id: string; // YYYYMMDD string format (e.g. "20260731")
+  date: string; // "YYYY-MM-DD"
+  filename: string; // e.g. "20260731.md"
+  frontmatter: MemoFrontmatter;
+  content: string; // Markdown body text
+  rawMarkdown: string; // Full markdown content including frontmatter
+  aiSummary: string; // AI generated summary text
+  updatedAt: string; // ISO format updated timestamp
+}
+
 export interface AppSettings {
   storagePath: string; // Local storage path (e.g., Documents/QuDaMemo/notes)
   configFilePath: string; // Settings file absolute path (e.g., Documents/QuDaMemo/config.json)
@@ -85,6 +97,20 @@ export interface AppSettings {
 
 ---
 
-## 4. Logger & Rotation Specification
+## 4. Rust Native IPC Command Specification
+
+High-performance communication interface between the React frontend and Rust backend.
+
+| Command            | Arguments                                 | Return Type                | Description                                                               |
+| :----------------- | :---------------------------------------- | :------------------------- | :------------------------------------------------------------------------ |
+| `load_all_memos`   | `storage_path: String`                    | `Result<Vec<QuickMemoDto>>`| Scans and parses all `.md` files in parallel from disk                    |
+| `save_memo_file`   | `storage_path: String, memo: QuickMemoDto`| `Result<()>`               | Atomically and safely writes a single memo file to disk                   |
+| `delete_memo_file` | `storage_path: String, memo_id: String`   | `Result<()>`               | Permanently removes the specified note file (`YYYYMMDD.md`) from disk     |
+| `save_app_config`  | `config_path: String, config_json: String`| `Result<()>`               | Safely writes application configuration (`config.json`) to disk           |
+| `load_app_config`  | `config_path: String`                     | `Result<String>`           | Reliably reads application configuration (`config.json`) from disk        |
+
+---
+
+## 5. Logger & Rotation Specification
 - **Log Path**: `[storagePath]/logs/qudamemo.log`
 - **Rotation**: Shifts to up to 3 generations (`qudamemo.log`, `qudamemo.log.1`, `qudamemo.log.2`) when exceeding 500KB.

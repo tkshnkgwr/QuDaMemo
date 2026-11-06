@@ -29,6 +29,22 @@
 - [x] Tauri v2 packaging and production build verification
 - [ ] Native system tray indicator IPC verification
 
+### v1.1.3 Release (2026-10-27)
+
+- [x] **Software License Migration (GPL-3.0-or-later)**:
+  - Transitioned project license from MIT License to **GNU General Public License v3.0 or later (`GPL-3.0-or-later`)**.
+  - Updated `LICENSE` to GPL v3 full text and synchronized license fields/badges in `package.json`, `Cargo.toml`, `README.md`, and `README_JA.md`.
+
+### v1.1.2 Release (2026-10-27)
+
+- [x] **Strict Environment Variable Usage for Documentation Paths (`Docs / Security`)**:
+  - Unified all documentation paths (e.g., in `CHANGELOG.md`) to `%USERPROFILE%\Documents\QuDaMemo\config.json` adhering to RULES.md.
+- [x] **README & Licensing Documentation Enhancement (`Docs`)**:
+  - Restored comprehensive feature overviews, startup instructions, and clear links to the LICENSE file in `README.md` and `README_JA.md`.
+- [x] **Workspace AI Rules & Skill Expansions (`Rules / Skills`)**:
+  - Added fast CLI tool policies (`ripgrep` / `fd` / `jq`) to `RULES.md` and `GEMINI.md`.
+  - Added new skill `vault-memo` for saving scratchpad ideas and technical notes into Obsidian Vault.
+
 ### v1.1.1 Release (2026-09-15)
 
 - [x] **Unified Path Configurations with %USERPROFILE% Environment Variable (`Storage / Config`)**:
@@ -72,3 +88,25 @@
 
 #### 🤖 AI & Local Integrations
 - [ ] **Local AI (Ollama / Llama.cpp) Integration**: Fully offline local LLM summarization option.
+
+#### 🛠️ Infrastructure & Robustness (Audit Findings & Backlog)
+- [ ] **[High Priority] Runtime Environment Variable Expansion (`%USERPROFILE%` / `%APPDATA%` / `$HOME`) in Rust**:
+  - Target Files: `src-tauri/src/lib.rs`, `src-tauri/src/commands.rs`
+  - Issue: `DEFAULT_SETTINGS` specifies `%USERPROFILE%\Documents\QuDaMemo\...`, but Rust's `std::fs` and `Path::new` do not automatically expand Windows environment variables. On fresh installations, this risks creating literal `%USERPROFILE%` folders or path failures.
+  - Solution: Implement a helper `resolve_path(raw_path: &str) -> PathBuf` to expand OS environment variables across all native IPC commands (`load_all_memos`, `save_memo_file`, `delete_memo_file`, `save_app_config`, `load_app_config`).
+- [ ] **[Type Safety] Eliminate `any` in Settings & Enforce `LastTestResultData`**:
+  - Target Files: `src/components/SettingsModal.tsx`, `src/components/settings/AiTab.tsx`
+  - Issue: Connection test results are currently typed as `useState<any>` and `setTestResult: React.Dispatch<React.SetStateAction<any>>`.
+  - Solution: Standardize state types to `LastTestResultData | null` defined in `src/types.ts`.
+- [ ] **[Robustness] Enhanced YAML Frontmatter Parsing in Rust (Multiline & Escape Support)**:
+  - Target Files: `src-tauri/src/lib.rs` (`parse_markdown_to_memo`)
+  - Issue: Current line-based string matching (`starts_with`) may fail on multiline summaries or list-formatted tags (`- tag1\n- tag2`).
+  - Solution: Upgrade to robust parsing compatible with `js-yaml` frontend behavior for multiline and escaped frontmatter fields.
+- [ ] **[Reliability] Add Error Logging for Secondary Settings Backup**:
+  - Target Files: `src/utils/fileStorage.ts` (`saveConfigFileToDisk`)
+  - Issue: Failures while saving secondary mirrored backup to `notes/config.json` are silently caught with `.catch(() => {})`.
+  - Solution: Add `logger.warn` to record backup issues in the in-app log viewer.
+- [ ] **[Quality Assurance] Integrate Rust Tests (`cargo test`) into CI/CD Pipeline**:
+  - Target Files: `.github/workflows/ci.yml`
+  - Issue: The CI workflow currently runs `npm run lint` and `cargo check` but omits `cargo test`.
+  - Solution: Add `cargo test --manifest-path src-tauri/Cargo.toml` to CI to guard against backend regressions on every push and PR.

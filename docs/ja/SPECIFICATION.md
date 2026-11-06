@@ -4,6 +4,7 @@
 
 ## 1. アプリケーション概要
 QuDaMemoは、Tauri v2、React 19、TypeScript、および Rust により構築された、低スペックPC環境でも超高速かつ快適に動作するデスクトップ指向の Daily Markdown Memo アプリケーションです。
+本ソフトウェアは **GNU General Public License v3.0 or later (`GPL-3.0-or-later`)** のもとでオープンソースとして公開されています。
 
 ---
 
@@ -57,6 +58,17 @@ export interface MemoFrontmatter {
   summary_type?: string;
 }
 
+export interface QuickMemo {
+  id: string; // YYYYMMDD 文字列形式 (例: "20260731")
+  date: string; // "YYYY-MM-DD"
+  filename: string; // 例: "20260731.md"
+  frontmatter: MemoFrontmatter;
+  content: string; // Markdown本文
+  rawMarkdown: string; // フロントマターを含むファイル全体のテキスト
+  aiSummary: string; // AI自動要約テキスト
+  updatedAt: string; // ISO形式の更新日時タイムスタンプ
+}
+
 export interface AppSettings {
   storagePath: string; // ローカル物理保存先パス (例: Documents/QuDaMemo/notes)
   configFilePath: string; // 設定ファイル絶対パス (例: Documents/QuDaMemo/config.json)
@@ -86,6 +98,20 @@ export interface AppSettings {
 
 ---
 
-## 4. ログ ＆ ローテーション仕様
+## 4. Rust ネイティブ IPC コマンド仕様
+
+フロントエンドと Rust バックエンド間の高速通信インターフェースです。
+
+| コマンド名         | 引数                                      | 返り値                     | 役割・処理概要                                                   |
+| :----------------- | :---------------------------------------- | :------------------------- | :--------------------------------------------------------------- |
+| `load_all_memos`   | `storage_path: String`                    | `Result<Vec<QuickMemoDto>>`| 保存先フォルダ内の全 `.md` ファイルを並列走査・高速パースして返却 |
+| `save_memo_file`   | `storage_path: String, memo: QuickMemoDto`| `Result<()>`               | 単一メモファイルを指定フォルダへアトミックかつ安全に保存         |
+| `delete_memo_file` | `storage_path: String, memo_id: String`   | `Result<()>`               | 指定されたメモID (`YYYYMMDD.md`) の物理ファイルをディスクから削除 |
+| `save_app_config`  | `config_path: String, config_json: String`| `Result<()>`               | 設定ファイル (`config.json`) を物理ディスクへ直接保存・バックアップ|
+| `load_app_config`  | `config_path: String`                     | `Result<String>`           | 設定ファイル (`config.json`) を物理ディスクから安全に読み出し     |
+
+---
+
+## 5. ログ ＆ ローテーション仕様
 - **ログ保存先**: `[storagePath]/logs/qudamemo.log`
 - **ログローテーション**: 500KB 超過時に最大3世代（`qudamemo.log`, `qudamemo.log.1`, `qudamemo.log.2`）へ自動シフト・保存。

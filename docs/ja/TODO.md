@@ -29,6 +29,22 @@
 - [x] Tauri v2 パッケージング・ビルド検証
 - [ ] バックグラウンド常駐タスクバーインジケーターのネイティブIPC検証
 
+### v1.1.3 リリース版 (2026-10-27)
+
+- [x] **ソフトウェアライセンスの移行 (GPL-3.0-or-later)**:
+  - プロジェクトのライセンスを MIT License から **GNU General Public License v3.0 or later (`GPL-3.0-or-later`)** へ移行。
+  - `LICENSE` ファイルを GPL v3 フルテキストに刷新し、`package.json`、`Cargo.toml`、`README.md`、`README_JA.md` のライセンス定義およびバッジ表示を同期更新。
+
+### v1.1.2 リリース版 (2026-10-27)
+
+- [x] **ドキュメント内パス環境変数化の徹底 (`Docs / Security`)**:
+  - `docs/ja/CHANGELOG.md` 等の設定ファイル絶対パス記述を、RULES.md（環境変数化原則）に基づき `%USERPROFILE%\Documents\QuDaMemo\config.json` に統一。
+- [x] **README ドキュメントおよびライセンス表記の整備 (`Docs`)**:
+  - `README.md` および `README_JA.md` における機能概要・開発起動手順を復元し、LICENSEファイルへの詳細リンク表記を最適化。
+- [x] **ワークスペース開発ルールおよびスキルの拡充 (`Rules / Skills`)**:
+  - `RULES.md` および `GEMINI.md` に高速CLIツール（`ripgrep` / `fd` / `jq`）の標準利用原則を追記。
+  - Obsidian Vault 一時メモ自動保存スキル（`vault-memo`）を新規配備し、スキル一覧テーブルに登録。
+
 ### v1.1.1 リリース版 (2026-09-15)
 
 - [x] **保存先パス・設定ファイルパスの環境変数 (%USERPROFILE%) 統一 (`Storage / Config`)**:
@@ -79,3 +95,25 @@
 - [ ] **ローカルAI (Ollama / Llama.cpp) 連携オプション**:
   - インターネット非接続環境でも完全ローカルで動作する要約エンジン連携
 - [ ] **モバイルビューレスポンシブ最適化**
+
+#### 🛠️ システム基盤 ＆ 堅牢性向上（総点検による改善課題）
+- [ ] **【最優先】パス環境変数（`%USERPROFILE%` / `%APPDATA%` / `$HOME`）の Rust 側実行時自動展開エンジンの実装**:
+  - 対象ファイル: `src-tauri/src/lib.rs`, `src-tauri/src/commands.rs`
+  - 課題: `DEFAULT_SETTINGS` で `%USERPROFILE%\Documents\QuDaMemo` を指定しているが、Rust 標準の `Path::new` や `std::fs` は Windows 環境変数文字列を展開しないため、新規環境起動時や手動入力時にリテラル名フォルダが作成されたりパスエラーになるリスクがある。
+  - 対策: `resolve_path(raw_path: &str) -> PathBuf` を実装し、すべてのネイティブコマンド（`load_all_memos`, `save_memo_file`, `delete_memo_file`, `save_app_config`, `load_app_config`）の入口で OS 環境変数を安全に展開・解決する。
+- [ ] **【型安全性】フロントエンド設定画面における `any` 型の完全排除と `LastTestResultData` 型への統一**:
+  - 対象ファイル: `src/components/SettingsModal.tsx`, `src/components/settings/AiTab.tsx`
+  - 課題: 接続テスト結果ステート（`testResult`）が `useState<any>` や `setTestResult: React.Dispatch<React.SetStateAction<any>>` と暫定的な `any` 型で宣言されている。
+  - 対策: `src/types.ts` に定義済みの `LastTestResultData | null` 型へ統一し、型安全性を最大化。
+- [ ] **【堅牢化】Rust 側 YAML フロントマターパーサーの強化（複数行・改行・エスケープ対応）**:
+  - 対象ファイル: `src-tauri/src/lib.rs` (`parse_markdown_to_memo`)
+  - 課題: 行頭単純前方一致（`starts_with`）によるパースのため、要約文に改行が含まれる場合やタグが複数行リスト（`- tag1\n- tag2`）の場合に正確に抽出できない可能性がある。
+  - 対策: フロントエンド（`js-yaml`）と同様に、複数行・インデント・エスケープ文字を含む YAML フロントマターを安全に双方向パースできるロジックへ強化。
+- [ ] **【信頼性】二重バックアップ書き込み（`notes/config.json`）時のエラーハンドリング・ログ出力追加**:
+  - 対象ファイル: `src/utils/fileStorage.ts` (`saveConfigFileToDisk`)
+  - 課題: ノートフォルダ直下への二重バックアップ保存失敗時に `.catch(() => {})` で例外を握り潰している。
+  - 対策: `logger.warn` を追加し、バックアップ書き込み失敗時にもアプリログビューアから原因を追跡可能にする。
+- [ ] **【品質保証】CI/CD 自動テストパイプラインへの Rust テスト（`cargo test`）統合**:
+  - 対象ファイル: `.github/workflows/ci.yml`（または各種ビルドスクリプト）
+  - 課題: 現在の CI ワークフローでは `npm run lint` や `cargo check` はあるが `cargo test` の自動実行ステップが不足している。
+  - 対策: `cargo test --manifest-path src-tauri/Cargo.toml` を CI ジョブへ正式追加し、メモ保存・パース・設定ファイル入出力のテストをコミット/PR毎に自動担保。

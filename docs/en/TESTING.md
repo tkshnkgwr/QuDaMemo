@@ -5,7 +5,7 @@
 ## 1. Principles
 
 - **Static Analysis**: TypeScript type checking (`npm run lint`) for syntax and type safety.
-- **Unit Testing**: Vitest (`npm run test`) for frontmatter parsing and Japanese holiday logic coverage.
+- **Unit Testing**: Vitest (`npm run test`) for frontmatter parsing and Japanese holiday logic coverage, and Cargo Test (`cargo test`) for Rust backend file I/O, frontmatter parsing, and configuration persistence testing.
 - **Build Verification**: Vite frontend compilation (`npm run build`) and Tauri Rust backend checking (`cargo check`).
 - **Performance Benchmarking**: Low-resource idle CPU and memory consumption measurements.
 
@@ -14,13 +14,16 @@
 # 1. TypeScript type check
 npm run lint
 
-# 2. Run unit tests (Vitest)
+# 2. Frontend unit tests (Vitest)
 npm run test
 
-# 3. Vite frontend build
+# 3. Rust backend unit tests (Cargo Test)
+cargo test --manifest-path src-tauri/Cargo.toml
+
+# 4. Vite frontend build
 npm run build
 
-# 4. Tauri Rust backend check
+# 5. Tauri Rust backend check
 cargo check --manifest-path src-tauri/Cargo.toml
 ```
 

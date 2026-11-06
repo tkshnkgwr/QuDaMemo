@@ -37,15 +37,30 @@
 npx tauri dev
 ```
 
-### フロントエンド単体検証
+### フロントエンド単体検証 ＆ テスト
 ```bash
+# TypeScript 型チェック
 npm run lint
+
+# Vitest 単体テスト実行
+npm run test
+
+# Vite プロダクションビルド
 npm run build
 ```
 
-### Tauri Rust バックエンド検証
+### Tauri Rust バックエンド検証 ＆ テスト
 ```bash
+# 構文・型チェック
 cargo check --manifest-path src-tauri/Cargo.toml
+
+# Rust ユニットテスト実行
+cargo test --manifest-path src-tauri/Cargo.toml
+```
+
+### ドキュメント生成 (TypeDoc)
+```bash
+npm run doc
 ```
 
 ### プロダクションパッケージのビルド
