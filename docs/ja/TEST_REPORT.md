@@ -2,8 +2,13 @@
 
 [English Version](../en/TEST_REPORT.md) | **日本語版**
 
-## 検証日時
-2026-08-26 (v1.1.0)
+---
+
+## 検証日時・環境
+- **検証バージョン**: v1.1.3
+- **検証環境**: Windows 11 (x64) / Node.js v18+ / Rust v1.80+ / WebView2
+
+---
 
 ## テスト結果サマリー
 
@@ -13,8 +18,8 @@
 | フロントエンド単体テスト   | `npm run test` (Vitest: frontmatter / holidays)       | **PASS** | 全テストケースパス                              |
 | Vite プロダクションビルド  | `npm run build`                                       | **PASS** | バンドル生成成功                                |
 | Tauri Rust バックエンド    | `cargo check --manifest-path src-tauri/Cargo.toml`    | **PASS** | コンパイル警告・エラーなし                      |
+| Rust ネイティブ単体テスト  | `cargo test --manifest-path src-tauri/Cargo.toml`     | **PASS** | パース・アトミックI/O・設定永続化全パス         |
+| 設定ファイル永続化検証     | 物理 `config.json` および保存先バックアップの相互保存  | **PASS** | キャッシュクリア後も設定・APIキーを正常復旧     |
 | AIモデル設定・カスタム入力 | 設定画面での `geminiModel` 変更・手動入力・保存        | **PASS** | `localStorage` および `config.json` に正常反映  |
 | AI要約API疎通              | `gemini-3.7-flash` での要約生成・接続テスト           | **PASS** | 高速レスポンス・要約正常生成                    |
 | 低リソース動作検証         | メモリ消費量（80MB未満）・レンダリングコスト          | **PASS** | CPU負荷スパイクなし                             |
-
-
