@@ -2,16 +2,29 @@
 
 **English Version** | [日本語版](../ja/TESTING.md)
 
-## 1. Principles
+---
 
-- **Static Analysis**: TypeScript type checking (`npm run lint`) for syntax and type safety.
-- **Unit Testing**: Vitest (`npm run test`) for frontmatter parsing and Japanese holiday logic coverage, and Cargo Test (`cargo test`) for Rust backend file I/O, frontmatter parsing, and configuration persistence testing.
-- **Build Verification**: Vite frontend compilation (`npm run build`) and Tauri Rust backend checking (`cargo check`).
-- **Performance Benchmarking**: Low-resource idle CPU and memory consumption measurements.
+## 1. Testing Principles & Quality Policy
 
-## 2. Verification Commands
+QuDaMemo utilizes a multi-tiered verification strategy to ensure high reliability on low-spec hardware and guarantee user data safety.
+
+| Test Category         | Target Scope                        | Tools / Commands                                   | Acceptance Criteria                            |
+| :-------------------- | :---------------------------------- | :------------------------------------------------- | :--------------------------------------------- |
+| **Static Analysis**   | All frontend source (`*.ts, *.tsx`) | `npm run lint` (`tsc --noEmit`)                    | 0 type errors                                  |
+| **Frontend Unit**     | Utilities, Frontmatter, Holidays    | `npm run test` (Vitest)                          | Accurate parsing & holiday calculations        |
+| **Rust Backend Unit** | Disk I/O, parsing, config store     | `cargo test --manifest-path src-tauri/Cargo.toml`  | Atomic writes, dual backup safety, no leaks    |
+| **Rust Syntax Check** | Tauri backend compilation           | `cargo check --manifest-path src-tauri/Cargo.toml` | Clean compilation without warnings or errors   |
+| **Production Build**  | Vite bundle generation              | `npm run build`                                    | Clean production bundle creation               |
+| **Resource Profiling**| Memory footprint & CPU utilization | Process metrics / footprint diagnostics            | Idle RAM < 80MB, CPU < 1%                      |
+
+---
+
+## 2. Local Verification Process
+
+When modifying source code, run the following sequence:
+
 ```bash
-# 1. TypeScript type check
+# 1. TypeScript static type check
 npm run lint
 
 # 2. Frontend unit tests (Vitest)
@@ -20,10 +33,16 @@ npm run test
 # 3. Rust backend unit tests (Cargo Test)
 cargo test --manifest-path src-tauri/Cargo.toml
 
-# 4. Vite frontend build
+# 4. Production Vite build
 npm run build
 
-# 5. Tauri Rust backend check
+# 5. Tauri Rust backend syntax check
 cargo check --manifest-path src-tauri/Cargo.toml
+cargo check --manifest-path src-tauri/Cargo.toml
+
+# 5. Rust native unit tests
+cargo test --manifest-path src-tauri/Cargo.toml
 ```
 
+> [!NOTE]
+> When modifying Markdown files exclusively (`*.md`), test suite execution is bypassed per RULES.md for rapid turnaround.
