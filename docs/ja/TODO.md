@@ -201,3 +201,15 @@
   - 対象ファイル: `.github/workflows/ci.yml`（または各種ビルドスクリプト）
   - 課題: 現在の CI ワークフローでは `npm run lint` や `cargo check` はあるが `cargo test` の自動実行ステップが不足している。
   - 対策: `cargo test --manifest-path src-tauri/Cargo.toml` を CI ジョブへ正式追加し、メモ保存・パース・設定ファイル入出力のテストをコミット/PR毎に自動担保。
+
+### 7. ⚡ Ver.2.0 軽量化・コード監査による新規改善課題（2026-11-16 監査結果）
+
+- [ ] **起動・リサイズ・設定保存時の多重 I/O と再レンダリング連鎖の解消 (`src/App.tsx`, `logger.ts`)**:
+  - 起動時の `saveAppSettings` 二重実行、ウィンドウリサイズ時の無デバウンス `setSettings`＋多重 IPC 発火、設定変更時の `saveAllMemos` 全メモ一斉上書きを廃止する。また `logger.ts` の1ログ毎ファイル全文 read/write 競合をバッファ／順次書き込みへ改善する。
+- [ ] **カレンダー・エディタの高頻度再レンダリングと死に計算の排除 (`CalendarView.tsx`, `MemoEditor.tsx`, `MemoList.tsx`)**:
+  - `CalendarView.tsx` の `onMouseMove` 毎再レンダリング（ツールチップ状態分離）および表示外グリッドの同時計算・毎セル祝日再計算を解消し、`MemoList.tsx` に `useMemo` を適用する。
+  - `MemoEditor.tsx` で一切参照されていない `yamlPreview`（毎打鍵の `js-yaml` dump＋祝日計算）を削除し、`ReactMarkdown` の `components` 定義を定数化、常時稼働の `animate-pulse` を要約実行中のみに限定、自動保存 `useEffect` の依存配列漏れと行番号スクロール非同期を修正する。また `QuickMemo` の `content` / `rawMarkdown` メモリ二重保持を整理する。
+- [ ] **過剰依存・不要な透過/ぼかし・無効クラスの削除 (`package.json`, `Cargo.toml`, `tauri.conf.json`)**:
+  - 未使用の `dotenv`・`motion`・`autoprefixer`・`specta` 関連（または型生成の正式接続）・`log`、未導入プラグイン由来の無効 `animate-in` クラス、不透明背景で全面覆われているにもかかわらず有効な `"transparent": true`、および各モーダルの `backdrop-blur-xs` を整理する。
+- [ ] **ファイルダイアログ・I/O多重フォールバック・未使用シンボル・重複ドキュメント整理 (`BackupTab.tsx`, `dialog.ts`, `fileStorage.ts`, `docs/`)**:
+  - `BackupTab.tsx` / `dialog.ts` の `exportFileWithDialog` 引数逆転と `save()` パス無視バグを修正し、`fileStorage.ts` の最大6〜9回探索フォールバックと `windowBounds` 二重管理を簡素化する。あわせて未使用シンボル・未接続ショートカット・本 TODO 内の `v1.1.2` / `v1.1.3` 重複記載を整理する。

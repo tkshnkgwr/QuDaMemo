@@ -201,3 +201,15 @@
   - Target Files: `.github/workflows/ci.yml`
   - Issue: The CI workflow currently runs `npm run lint` and `cargo check` but omits `cargo test`.
   - Solution: Add `cargo test --manifest-path src-tauri/Cargo.toml` to CI to guard against backend regressions on every push and PR.
+
+### 7. ⚡ Ver.2.0 Lightweight Optimization & Code Audit Findings (2026-11-16 Audit)
+
+- [ ] **Eliminate Redundant Startup/Resize/Settings I/O & Re-render Cascades (`src/App.tsx`, `logger.ts`)**:
+  - Remove duplicate `saveAppSettings` calls at startup, debounce window resize updates (`setSettings` + IPC), stop calling `saveAllMemos` across every note on settings change, and replace per-log full-file read/write in `logger.ts` with buffered/serialized writes.
+- [ ] **Eliminate Frequent Re-renders & Dead Calculations in Calendar/Editor (`CalendarView.tsx`, `MemoEditor.tsx`, `MemoList.tsx`)**:
+  - Isolate `onMouseMove` hover state in `CalendarView.tsx`, compute only the active grid with `useMemo` instead of both month/week grids and per-cell holidays every render, and memoize `MemoList.tsx` filtering/sorting.
+  - Remove unused `yamlPreview` (`js-yaml` dump on every keystroke) in `MemoEditor.tsx`, hoist `ReactMarkdown` `components` object, restrict `animate-pulse` to active AI summarization, fix autosave `useEffect` dependencies and line-number scroll sync, and eliminate `QuickMemo` `content`/`rawMarkdown` memory duplication.
+- [ ] **Remove Unused Dependencies, Unnecessary Transparency/Blur & Dead CSS Classes (`package.json`, `Cargo.toml`, `tauri.conf.json`)**:
+  - Clean up unused `dotenv`, `motion`, `autoprefixer`, unused `specta` crates (or wire codegen properly), unused `log` crate, dead `animate-in` classes, unnecessary `"transparent": true` in `tauri.conf.json` (app uses opaque root background), and modal `backdrop-blur-xs`.
+- [ ] **Fix Dialog Bug, Redundant Config Fallbacks, Unused Symbols & Duplicate Changelog (`BackupTab.tsx`, `dialog.ts`, `fileStorage.ts`, `docs/`)**:
+  - Fix argument order reversal in `BackupTab.tsx` and ignored `save()` path in `dialog.ts`, simplify multi-fallback config probing in `fileStorage.ts` and duplicate `windowBounds` tracking, remove unused symbols/unwired shortcuts, and deduplicate repeated `v1.1.2`/`v1.1.3` entries in `TODO.md`.
