@@ -1,4 +1,5 @@
 import { open, save } from '@tauri-apps/plugin-dialog';
+import { writeTextFile } from '@tauri-apps/plugin-fs';
 
 /**
  * フォルダ選択ダイアログを開き、選択されたディレクトリパスを返す。
@@ -59,7 +60,12 @@ export async function exportFileWithDialog(
     });
 
     if (filePath) {
-      saveBlobFallback(defaultFileName, content, mimeType);
+      try {
+        await writeTextFile(filePath, content);
+      } catch (writeErr) {
+        console.warn('Tauri writeTextFile failed, fallback to browser download:', writeErr);
+        saveBlobFallback(defaultFileName, content, mimeType);
+      }
       return true;
     }
     return false;

@@ -1,6 +1,6 @@
 # QuDaMemo (Quick Daily Memo) - 日本語概要
 
-[![Version](https://img.shields.io/badge/version-1.1.3-blue.svg)](package.json)
+[![Version](https://img.shields.io/badge/version-1.1.4-blue.svg)](package.json)
 [![Tauri](https://img.shields.io/badge/tauri-v2-blue.svg)](https://v2.tauri.app/)
 [![React](https://img.shields.io/badge/react-19-61dafb.svg)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/typescript-5.8-blue.svg)](https://www.typescriptlang.org/)
@@ -44,7 +44,7 @@ QuDaMemo は **Vite + React 19 フロントエンド** と **Tauri v2 + Rust ネ
 ```mermaid
 flowchart LR
     Frontend["React 19 Frontend\n(エディタ / カレンダー / 設定)"]
-    IPC["Tauri v2 IPC Bridge\n(Type-Safe Specta)"]
+    IPC["Tauri v2 IPC Bridge\n(Serde JSON)"]
     Backend["Rust Core Engine\n(アトミックI/O / 物理設定永続化)"]
     Disk[("ローカル Markdown / config.json\n(%USERPROFILE%\\Documents\\QuDaMemo)")]
 

@@ -31,7 +31,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({ formData, setFormData })
             type="text"
             value={formData.storagePath}
             onChange={(e) => setFormData((prev) => ({ ...prev, storagePath: e.target.value }))}
-            placeholder="C:\Users\..."
+            placeholder="%USERPROFILE%\Documents\QuDaMemo\notes"
             className="flex-1 px-3 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
           />
           <button

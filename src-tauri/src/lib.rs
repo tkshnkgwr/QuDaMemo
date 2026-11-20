@@ -1,18 +1,18 @@
 //! # QuDaMemo Tauri Core Module
 //!
 //! QuDaMemo デスクトップアプリケーションの核心となる Rust バックエンドライブラリです。
-//! 超軽量・高パフォーマンスな並列ファイルスキャン、YAML Frontmatterパース、
-//! ディスクへのアトミックな書き込み・削除機能を提供します。
+//! 高速なファイルスキャン、YAML Frontmatter パース、
+//! 一時ファイル経由のアトミック書き込み、およびパストラバーサル防御を提供します。
 
 pub mod commands;
 
 use serde::{Deserialize, Serialize};
-use specta::Type;
-use std::fs;
-use std::path::Path;
+use std::fs::{self, File};
+use std::io::Write;
+use std::path::{Component, Path, PathBuf};
 
 /// メモファイルの YAML Frontmatter メタデータ情報
-#[derive(Debug, Serialize, Deserialize, Clone, Type, PartialEq, Eq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct FrontmatterDto {
     /// メモのタイトル
     #[serde(default)]
@@ -28,6 +28,9 @@ pub struct FrontmatterDto {
     /// AI要約テキスト
     #[serde(default)]
     pub summary: Option<String>,
+    /// 要約生成エンジン種別 (例: "gemini-3.7-flash", "local-fallback")
+    #[serde(default)]
+    pub summary_type: Option<String>,
     /// タグ一覧
     #[serde(default)]
     pub tags: Vec<String>,
@@ -37,7 +40,7 @@ pub struct FrontmatterDto {
 }
 
 /// メモ1件を表す高機能 DTO 構造体
-#[derive(Debug, Serialize, Deserialize, Clone, Type, PartialEq, Eq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct QuickMemoDto {
     /// メモ識別子 (YYYYMMDD)
     pub id: String,
@@ -60,6 +63,136 @@ pub struct QuickMemoDto {
     pub updated_at: String,
 }
 
+/// `%USERPROFILE%` や先頭 `~` をOSのホームディレクトリパスへ安全に展開する
+pub fn expand_env_path(raw_path: &str) -> PathBuf {
+    let trimmed = raw_path.trim();
+    let home = std::env::var("USERPROFILE")
+        .or_else(|_| std::env::var("HOME"))
+        .unwrap_or_default();
+
+    if !home.is_empty() {
+        if let Some(rest) = trimmed
+            .strip_prefix("%USERPROFILE%")
+            .or_else(|| trimmed.strip_prefix("%userprofile%"))
+        {
+            let rel = rest.trim_start_matches(['\\', '/']);
+            return if rel.is_empty() {
+                PathBuf::from(home)
+            } else {
+                PathBuf::from(home).join(rel)
+            };
+        }
+        if trimmed == "~" {
+            return PathBuf::from(home);
+        }
+        if let Some(rest) = trimmed
+            .strip_prefix("~/")
+            .or_else(|| trimmed.strip_prefix("~\\"))
+        {
+            return PathBuf::from(home).join(rest);
+        }
+    }
+
+    PathBuf::from(trimmed)
+}
+
+/// 単一ファイル名であることを検証し、パストラバーサル (`..` やディレクトリ区切り) を遮断する
+fn validate_single_filename(name: &str) -> Result<&str, String> {
+    let trimmed = name.trim();
+    if trimmed.is_empty()
+        || trimmed.contains('/')
+        || trimmed.contains('\\')
+        || trimmed.contains('\0')
+    {
+        return Err(format!("不正なファイル名です: {}", name));
+    }
+    let path = Path::new(trimmed);
+    let mut components = path.components();
+    match (components.next(), components.next()) {
+        (Some(Component::Normal(_)), None) => Ok(trimmed),
+        _ => Err(format!("パストラバーサルが検出されました: {}", name)),
+    }
+}
+
+/// 同一ディレクトリ内の一時ファイルへ書き込み＋フラッシュした後、アトミックに置換する
+fn atomic_write(target_path: &Path, data: &[u8]) -> Result<(), String> {
+    if let Some(parent) = target_path.parent() {
+        if !parent.exists() {
+            fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+        }
+    }
+
+    let file_name = target_path
+        .file_name()
+        .and_then(|n| n.to_str())
+        .ok_or_else(|| format!("無効な保存先パスです: {}", target_path.display()))?;
+    let pid = std::process::id();
+    let tmp_path = target_path.with_file_name(format!(".{}.{}.tmp", file_name, pid));
+
+    let write_res = (|| -> std::io::Result<()> {
+        let mut file = File::create(&tmp_path)?;
+        file.write_all(data)?;
+        file.sync_all()?;
+        Ok(())
+    })();
+
+    if let Err(e) = write_res {
+        let _ = fs::remove_file(&tmp_path);
+        return Err(e.to_string());
+    }
+
+    if let Err(rename_err) = fs::rename(&tmp_path, target_path) {
+        // Windows 環境で既存ファイル上書き rename が失敗するケースへの安全フォールバック
+        if target_path.exists() {
+            fs::copy(&tmp_path, target_path).map_err(|e| {
+                let _ = fs::remove_file(&tmp_path);
+                format!("rename失敗({})後のコピーにも失敗: {}", rename_err, e)
+            })?;
+            let _ = fs::remove_file(&tmp_path);
+        } else {
+            let _ = fs::remove_file(&tmp_path);
+            return Err(rename_err.to_string());
+        }
+    }
+
+    Ok(())
+}
+
+/// 先頭の YAML Frontmatter ブロック (`---` 行 〜 `---` 行) と本文を安全に分離する
+fn split_frontmatter(raw: &str) -> Option<(String, String)> {
+    let mut lines = raw.split_inclusive('\n');
+    let first = lines.next()?;
+    if first.trim_end_matches(['\r', '\n']) != "---" {
+        return None;
+    }
+
+    let mut yaml_buf = String::new();
+    let mut consumed = first.len();
+    for line in lines {
+        consumed += line.len();
+        if line.trim_end_matches(['\r', '\n']) == "---" {
+            let body = raw[consumed..].trim_start().to_string();
+            return Some((yaml_buf, body));
+        }
+        yaml_buf.push_str(line);
+    }
+
+    None
+}
+
+/// クォートを剥がす小さなヘルパー
+fn unquote(val: &str) -> String {
+    let trimmed = val.trim();
+    if trimmed.len() >= 2
+        && ((trimmed.starts_with('"') && trimmed.ends_with('"'))
+            || (trimmed.starts_with('\'') && trimmed.ends_with('\'')))
+    {
+        trimmed[1..trimmed.len() - 1].to_string()
+    } else {
+        trimmed.to_string()
+    }
+}
+
 /// YAML Frontmatter および本文を高速にパースして `QuickMemoDto` へ変換する
 pub fn parse_markdown_to_memo(file_path: &Path, raw: &str) -> Option<QuickMemoDto> {
     let filename = file_path.file_name()?.to_str()?.to_string();
@@ -76,67 +209,68 @@ pub fn parse_markdown_to_memo(file_path: &Path, raw: &str) -> Option<QuickMemoDt
 
     let mut title = format!("Daily Memo - {}", formatted_date);
     let mut summary = String::new();
+    let mut summary_type: Option<String> = None;
     let mut tags = Vec::new();
     let mut weekday = String::new();
     let mut holiday = None;
     let mut updated_at = String::new();
     let mut body_content = raw.to_string();
 
-    // --- YAML Frontmatter パース ---
-    if let Some(stripped) = raw.strip_prefix("---") {
-        if let Some(end_idx) = stripped.find("---") {
-            let yaml_str = &stripped[..end_idx];
-            body_content = stripped[end_idx + 3..].trim_start().to_string();
+    // --- YAML Frontmatter パース (インライン配列 ＆ ブロック配列両対応) ---
+    if let Some((yaml_str, body)) = split_frontmatter(raw) {
+        body_content = body;
+        let mut in_tags_block = false;
 
-            for line in yaml_str.lines() {
-                let line = line.trim();
-                if line.starts_with("title:") {
-                    title = line
-                        .trim_start_matches("title:")
-                        .trim()
-                        .trim_matches('"')
-                        .trim_matches('\'')
-                        .to_string();
-                } else if line.starts_with("summary:") {
-                    summary = line
-                        .trim_start_matches("summary:")
-                        .trim()
-                        .trim_matches('"')
-                        .trim_matches('\'')
-                        .to_string();
-                } else if line.starts_with("weekday:") {
-                    weekday = line
-                        .trim_start_matches("weekday:")
-                        .trim()
-                        .trim_matches('"')
-                        .trim_matches('\'')
-                        .to_string();
-                } else if line.starts_with("holiday:") {
-                    let h = line
-                        .trim_start_matches("holiday:")
-                        .trim()
-                        .trim_matches('"')
-                        .trim_matches('\'');
-                    if !h.is_empty() && h != "null" {
-                        holiday = Some(h.to_string());
+        for raw_line in yaml_str.lines() {
+            let line = raw_line.trim();
+            if line.is_empty() {
+                continue;
+            }
+
+            if in_tags_block {
+                if let Some(item) = line.strip_prefix('-') {
+                    let tag = unquote(item);
+                    if !tag.is_empty() {
+                        tags.push(tag);
                     }
-                } else if line.starts_with("updated_at:") || line.starts_with("updatedAt:") {
-                    let val = if line.starts_with("updated_at:") {
-                        line.trim_start_matches("updated_at:")
-                    } else {
-                        line.trim_start_matches("updatedAt:")
-                    };
-                    updated_at = val.trim().trim_matches('"').trim_matches('\'').to_string();
-                } else if line.starts_with("tags:") {
-                    let tags_part = line.trim_start_matches("tags:").trim();
-                    if tags_part.starts_with('[') && tags_part.ends_with(']') {
-                        let inner = &tags_part[1..tags_part.len() - 1];
-                        tags = inner
-                            .split(',')
-                            .map(|s| s.trim().trim_matches('"').trim_matches('\'').to_string())
-                            .filter(|s| !s.is_empty())
-                            .collect();
-                    }
+                    continue;
+                } else {
+                    in_tags_block = false;
+                }
+            }
+
+            if let Some(rest) = line.strip_prefix("title:") {
+                title = unquote(rest);
+            } else if let Some(rest) = line.strip_prefix("summary_type:") {
+                let val = unquote(rest);
+                if !val.is_empty() && val != "null" {
+                    summary_type = Some(val);
+                }
+            } else if let Some(rest) = line.strip_prefix("summary:") {
+                summary = unquote(rest);
+            } else if let Some(rest) = line.strip_prefix("weekday:") {
+                weekday = unquote(rest);
+            } else if let Some(rest) = line.strip_prefix("holiday:") {
+                let h = unquote(rest);
+                if !h.is_empty() && h != "null" {
+                    holiday = Some(h);
+                }
+            } else if let Some(rest) = line
+                .strip_prefix("updated_at:")
+                .or_else(|| line.strip_prefix("updatedAt:"))
+            {
+                updated_at = unquote(rest);
+            } else if let Some(rest) = line.strip_prefix("tags:") {
+                let tags_part = rest.trim();
+                if tags_part.is_empty() {
+                    in_tags_block = true;
+                } else if tags_part.starts_with('[') && tags_part.ends_with(']') {
+                    let inner = &tags_part[1..tags_part.len() - 1];
+                    tags = inner
+                        .split(',')
+                        .map(unquote)
+                        .filter(|s| !s.is_empty())
+                        .collect();
                 }
             }
         }
@@ -162,6 +296,7 @@ pub fn parse_markdown_to_memo(file_path: &Path, raw: &str) -> Option<QuickMemoDt
             weekday,
             holiday,
             summary: Some(summary),
+            summary_type,
             tags,
             updated_at: Some(updated_at.clone()),
         },
@@ -170,13 +305,13 @@ pub fn parse_markdown_to_memo(file_path: &Path, raw: &str) -> Option<QuickMemoDt
 }
 
 pub fn load_all_memos_impl(storage_path: &str) -> Result<Vec<QuickMemoDto>, String> {
-    let path = Path::new(storage_path);
+    let path = expand_env_path(storage_path);
     if !path.exists() {
-        let _ = fs::create_dir_all(path);
+        fs::create_dir_all(&path).map_err(|e| e.to_string())?;
         return Ok(Vec::new());
     }
 
-    let entries = fs::read_dir(path).map_err(|e| e.to_string())?;
+    let entries = fs::read_dir(&path).map_err(|e| e.to_string())?;
     let mut memos = Vec::new();
 
     for entry in entries.flatten() {
@@ -195,18 +330,26 @@ pub fn load_all_memos_impl(storage_path: &str) -> Result<Vec<QuickMemoDto>, Stri
 }
 
 pub fn save_memo_file_impl(storage_path: &str, memo: &QuickMemoDto) -> Result<(), String> {
-    let dir = Path::new(storage_path);
-    if !dir.exists() {
-        fs::create_dir_all(dir).map_err(|e| e.to_string())?;
+    let dir = expand_env_path(storage_path);
+    let safe_name = validate_single_filename(&memo.filename)?;
+    if !safe_name.to_ascii_lowercase().ends_with(".md") {
+        return Err(format!(
+            "Markdown 以外のファイルは保存できません: {}",
+            safe_name
+        ));
     }
-    let file_path = dir.join(&memo.filename);
-    fs::write(file_path, &memo.raw_markdown).map_err(|e| e.to_string())?;
-    Ok(())
+    let file_path = dir.join(safe_name);
+    atomic_write(&file_path, memo.raw_markdown.as_bytes())
 }
 
 pub fn delete_memo_file_impl(storage_path: &str, memo_id: &str) -> Result<(), String> {
-    let dir = Path::new(storage_path);
-    let filename = format!("{}.md", memo_id);
+    let dir = expand_env_path(storage_path);
+    let safe_id = validate_single_filename(memo_id)?;
+    let filename = if safe_id.to_ascii_lowercase().ends_with(".md") {
+        safe_id.to_string()
+    } else {
+        format!("{}.md", safe_id)
+    };
     let file_path = dir.join(filename);
     if file_path.exists() {
         fs::remove_file(file_path).map_err(|e| e.to_string())?;
@@ -215,20 +358,14 @@ pub fn delete_memo_file_impl(storage_path: &str, memo_id: &str) -> Result<(), St
 }
 
 pub fn save_app_config_impl(config_path: &str, config_json: &str) -> Result<(), String> {
-    let path = Path::new(config_path);
-    if let Some(parent) = path.parent() {
-        if !parent.exists() {
-            fs::create_dir_all(parent).map_err(|e| e.to_string())?;
-        }
-    }
-    fs::write(path, config_json).map_err(|e| e.to_string())?;
-    Ok(())
+    let path = expand_env_path(config_path);
+    atomic_write(&path, config_json.as_bytes())
 }
 
 pub fn load_app_config_impl(config_path: &str) -> Result<String, String> {
-    let path = Path::new(config_path);
+    let path = expand_env_path(config_path);
     if !path.exists() {
-        return Err(format!("File not found: {}", config_path));
+        return Err(format!("File not found: {}", path.display()));
     }
     fs::read_to_string(path).map_err(|e| e.to_string())
 }
@@ -269,10 +406,11 @@ mod tests {
     use tempfile::tempdir;
 
     #[test]
-    fn test_parse_markdown_to_memo_valid() {
+    fn test_parse_markdown_to_memo_valid_inline_tags() {
         let raw = r#"---
 title: "テストメモ"
 summary: "これは要約テストです"
+summary_type: "gemini-3.7-flash"
 weekday: "月"
 tags: ["Rust", "Tauri"]
 updatedAt: "2026-08-04T12:00:00Z"
@@ -288,8 +426,27 @@ updatedAt: "2026-08-04T12:00:00Z"
         assert_eq!(memo.filename, "20260804.md");
         assert_eq!(memo.ai_summary, "これは要約テストです");
         assert_eq!(memo.frontmatter.title, Some("テストメモ".to_string()));
+        assert_eq!(
+            memo.frontmatter.summary_type,
+            Some("gemini-3.7-flash".to_string())
+        );
         assert_eq!(memo.frontmatter.tags, vec!["Rust", "Tauri"]);
         assert!(memo.content.contains("今日のメモ本文"));
+    }
+
+    #[test]
+    fn test_parse_markdown_to_memo_block_tags_and_hr() {
+        let raw = "---\r\ndate: '2026-11-20'\r\nweekday: 金曜日\r\nholiday: null\r\ntags:\r\n  - 仕事\r\n  - 'React'\r\nsummary: ブロック配列のテスト\r\nsummary_type: local-fallback\r\n---\r\n\r\n# 見出し\r\n\r\n---\r\n水平線の後の本文\r\n";
+        let path = Path::new("20261120.md");
+        let memo = parse_markdown_to_memo(path, raw).expect("パースに成功するべきです");
+
+        assert_eq!(memo.frontmatter.tags, vec!["仕事", "React"]);
+        assert_eq!(memo.frontmatter.holiday, None);
+        assert_eq!(
+            memo.frontmatter.summary_type,
+            Some("local-fallback".to_string())
+        );
+        assert!(memo.content.contains("水平線の後の本文"));
     }
 
     #[test]
@@ -317,13 +474,14 @@ updatedAt: "2026-08-04T12:00:00Z"
                 weekday: "火".to_string(),
                 holiday: None,
                 summary: Some("要約テキスト".to_string()),
+                summary_type: Some("gemini-3.7-flash".to_string()),
                 tags: vec!["Test".to_string()],
                 updated_at: Some("2026-08-04".to_string()),
             },
             updated_at: "2026-08-04".to_string(),
         };
 
-        // 保存のテスト
+        // 保存のテスト（アトミック書き込み）
         save_memo_file_impl(dir_path, &memo).expect("保存に成功するべきです");
 
         // 読み込みのテスト
@@ -338,14 +496,50 @@ updatedAt: "2026-08-04T12:00:00Z"
     }
 
     #[test]
+    fn test_path_traversal_rejected() {
+        let dir = tempdir().expect("一時ディレクトリの作成失敗");
+        let dir_path = dir.path().to_str().unwrap();
+
+        let evil_memo = QuickMemoDto {
+            id: "20260804".to_string(),
+            date: "2026-08-04".to_string(),
+            filename: "../evil.md".to_string(),
+            content: "x".to_string(),
+            raw_markdown: "x".to_string(),
+            ai_summary: String::new(),
+            frontmatter: FrontmatterDto {
+                title: None,
+                date: "2026-08-04".to_string(),
+                weekday: String::new(),
+                holiday: None,
+                summary: None,
+                summary_type: None,
+                tags: Vec::new(),
+                updated_at: None,
+            },
+            updated_at: String::new(),
+        };
+
+        assert!(save_memo_file_impl(dir_path, &evil_memo).is_err());
+        assert!(delete_memo_file_impl(dir_path, "../evil").is_err());
+    }
+
+    #[test]
+    fn test_expand_env_path_userprofile() {
+        let expanded = expand_env_path("%USERPROFILE%\\Documents\\QuDaMemo");
+        assert!(expanded.ends_with(Path::new("Documents").join("QuDaMemo")));
+        assert!(!expanded.to_string_lossy().contains("%USERPROFILE%"));
+    }
+
+    #[test]
     fn test_save_and_load_app_config() {
         let dir = tempdir().expect("一時ディレクトリの作成失敗");
         let config_file_path = dir.path().join("config.json");
         let path_str = config_file_path.to_str().unwrap();
 
-        let dummy_json = r#"{"storagePath":"C:\\Dummy","geminiApiKey":"test_api_key_123"}"#;
+        let dummy_json = r#"{"storagePath":"%USERPROFILE%\\Documents\\QuDaMemo\\notes","geminiApiKey":"test_api_key_123"}"#;
 
-        // 保存のテスト
+        // 保存のテスト（アトミック書き込み）
         save_app_config_impl(path_str, dummy_json).expect("設定ファイルの保存に成功するべきです");
 
         // 読み込みのテスト

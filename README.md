@@ -1,6 +1,6 @@
 # QuDaMemo (Quick Daily Memo)
 
-[![Version](https://img.shields.io/badge/version-1.1.3-blue.svg)](package.json)
+[![Version](https://img.shields.io/badge/version-1.1.4-blue.svg)](package.json)
 [![Tauri](https://img.shields.io/badge/tauri-v2-blue.svg)](https://v2.tauri.app/)
 [![React](https://img.shields.io/badge/react-19-61dafb.svg)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/typescript-5.8-blue.svg)](https://www.typescriptlang.org/)
@@ -44,7 +44,7 @@ QuDaMemo adopts a clear decoupled architecture separating a **Vite + React 19 fr
 ```mermaid
 flowchart LR
     Frontend["React 19 Frontend\n(Editor / Calendar / Settings)"]
-    IPC["Tauri v2 IPC Bridge\n(Type-Safe Specta)"]
+    IPC["Tauri v2 IPC Bridge\n(Serde JSON)"]
     Backend["Rust Core Engine\n(Atomic I/O / Physical Persistence)"]
     Disk[("Local Markdown / config.json\n(%USERPROFILE%\\Documents\\QuDaMemo)")]
 

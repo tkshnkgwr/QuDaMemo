@@ -106,7 +106,7 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showShortcutsModal, isSettingsOpen, memos]);
+  }, [showOverviewModal, showShortcutsModal, isSettingsOpen, memos]);
 
   // 起動時に設定ファイル (config.json) およびローカル保存先フォルダ (storagePath) から物理データをロード
   useEffect(() => {

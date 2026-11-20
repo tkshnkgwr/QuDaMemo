@@ -19,7 +19,7 @@ flowchart TD
         LogViewer["ログビューア / ダイアログ (リアルタイムログ確認)"]
     end
 
-    subgraph IPC ["Tauri v2 IPC ブリッジ (Type-Safe Specta)"]
+    subgraph IPC ["Tauri v2 IPC ブリッジ (Serde JSON)"]
         direction TB
         Invoke["invoke / Commands 通信"]
     end
@@ -53,7 +53,7 @@ QuDaMemo は以下の 4 つの論理レイヤーで構成されています。
 | :----------------------- | :---------------------------- | :----------------------------------------------------------------------------- |
 | **プレゼンテーション層** | React 19, TailwindCSS, Lucide | 高速レンダリング、エディタUI、カレンダー表示、テーマ制御、モーダル管理         |
 | **ステート＆同期層**     | TypeScript, LocalStorage      | UIステート管理、一時キャッシュ、フロントマター相互変換、AI要約非同期リクエスト |
-| **Tauri IPC ブリッジ**   | Tauri v2, Specta, Serde       | 型安全なIPC通信、非同期シリアライゼーション、OSネイティブイベント仲介         |
+| **Tauri IPC ブリッジ**   | Tauri v2, Serde JSON          | 型安全なIPC通信、非同期シリアライゼーション、OSネイティブイベント仲介         |
 | **ネイティブコア層**     | Rust 1.80+, std::fs, Tempfile | アトミックファイル保存、高速Markdownパース、物理設定永続化、ログローテーション |
 
 - **UI / フロントエンド (React 19 / TypeScript)**:

@@ -5,10 +5,20 @@ import { fetch as tauriFetch } from '@tauri-apps/plugin-http';
 
 async function safeFetch(url: string, options?: RequestInit): Promise<Response> {
   try {
-    return await tauriFetch(url, options as any);
-  } catch (err) {
+    return await tauriFetch(url, options as Parameters<typeof tauriFetch>[1]);
+  } catch {
     return await window.fetch(url, options);
   }
+}
+
+export interface AiConnectionTestResult {
+  loading: boolean;
+  testedAt?: string;
+  apiTest?: { success: boolean; latency: number; message: string };
+  urlTest?: { success: boolean; latency: number; message: string };
+  hasCustomKey?: boolean;
+  model?: string;
+  baseUrl?: string;
 }
 
 interface AiTabProps {
@@ -16,16 +26,8 @@ interface AiTabProps {
   setFormData: React.Dispatch<React.SetStateAction<AppSettings>>;
   showApiKey: boolean;
   setShowApiKey: React.Dispatch<React.SetStateAction<boolean>>;
-  testResult: {
-    loading: boolean;
-    testedAt?: string;
-    apiTest?: { success: boolean; latency: number; message: string };
-    urlTest?: { success: boolean; latency: number; message: string };
-    hasCustomKey?: boolean;
-    model?: string;
-    baseUrl?: string;
-  } | null;
-  setTestResult: React.Dispatch<React.SetStateAction<any>>;
+  testResult: AiConnectionTestResult | null;
+  setTestResult: React.Dispatch<React.SetStateAction<AiConnectionTestResult | null>>;
 }
 
 export const AiTab: React.FC<AiTabProps> = ({
@@ -126,8 +128,9 @@ export const AiTab: React.FC<AiTabProps> = ({
         const errText = await res.text().catch(() => '');
         apiRes = { success: false, latency: latency1, message: `エラー ${res.status}: ${errText.slice(0, 120)}` };
       }
-    } catch (err: any) {
-      apiRes = { success: false, latency: Math.round(performance.now() - start1), message: err?.message || 'ネットワーク通信エラー' };
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'ネットワーク通信エラー';
+      apiRes = { success: false, latency: Math.round(performance.now() - start1), message: msg };
     }
 
     // 2. Base URL / プロキシ導通テスト
@@ -141,8 +144,9 @@ export const AiTab: React.FC<AiTabProps> = ({
       } else {
         urlRes = { success: false, latency: latency2, message: `レスポンスエラー (${res2.status})` };
       }
-    } catch (err: any) {
-      urlRes = { success: false, latency: Math.round(performance.now() - start2), message: err?.message || 'プロキシ非導通' };
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'プロキシ非導通';
+      urlRes = { success: false, latency: Math.round(performance.now() - start2), message: msg };
     }
 
     const finalTestResult = {

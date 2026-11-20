@@ -31,6 +31,13 @@
 - [x] Tauri v2 packaging and production build verification
 - [ ] Native system tray indicator IPC verification
 
+### v1.1.4 Release (2026-11-20)
+
+- [x] **Rust Backend Hardening & Frontmatter Parser Enhancement (`src-tauri/src/lib.rs`)**:
+  - Added block-array `tags:` & `summary_type` parsing, CRLF/HR handling, `%USERPROFILE%`/`~` path expansion, path-traversal guard, and true atomic writes with 7 unit tests.
+- [x] **Frontend Bug Fixes & Dependency Cleanup**:
+  - Fixed config export in `BackupTab.tsx`/`dialog.ts` and placeholder in `GeneralTab.tsx`, pruned unused crates/npm packages, and added `cargo test` to CI.
+
 ### v1.1.3 Release (2026-10-27)
 
 - [x] **Software License Migration (GPL-3.0-or-later)**:
@@ -58,31 +65,15 @@
 - [x] **Enhanced Cargo Dependency Reliability (`Build / Cargo`)**:
   - Updated `cc` crate in `Cargo.lock` to ensure solid compilation across all platforms.
 
-### v1.1.2 Release (2026-10-27)
-
-- [x] **Complete Path Variable Harmonization in Documentation (`Docs / Security`)**:
-  - Unified configuration file and note directory paths across all documentation to `%USERPROFILE%\Documents\QuDaMemo\config.json`, adhering strictly to RULES.md environment variable standards.
-- [x] **README Documentation & License Synchronization (`Docs / Readme`)**:
-  - Restored Key Features and Quick Start workflows in README files, updating the license notice with an explicit reference to the LICENSE file.
-- [x] **Enhanced Workspace Rules & Skills (`Rules / Skills`)**:
-  - Added fast CLI tool principles (`ripgrep` / `fd` / `jq`) to `RULES.md` and `GEMINI.md`.
-  - Added new `vault-memo` skill for automated fleeting note capture into Obsidian Vault.
-
-### v1.1.3 Release (2026-10-27)
-
-- [x] **Software License Transition to GPL-3.0-or-later (`License / Legal`)**:
-  - Migrated project license from MIT License to **GNU General Public License v3.0 or later (`GPL-3.0-or-later`)**.
-  - Updated `LICENSE` text to GPL v3, and synchronized license metadata and status badges across `package.json`, `Cargo.toml`, `README.md`, and `README_JA.md`.
-
 ---
 
 ## 🛠️ Required Fixes & Code Cleanup (Fixes & Code Cleanup)
 
 ### 1. 🐛 Logic Bugs & Argument Mismatches
 
-- [ ] **Fix Inverted Arguments in Settings Export (`src/components/settings/BackupTab.tsx`)**:
+- [x] **Fix Inverted Arguments in Settings Export (`src/components/settings/BackupTab.tsx` / `src/utils/dialog.ts`)**:
   - In `BackupTab.tsx` line 20, `exportFileWithDialog(jsonStr, 'qudamemo_config.json', 'JSON (*.json)')` has inverted arguments (passing huge JSON content into the filename parameter). Correct to `exportFileWithDialog('qudamemo_config.json', jsonStr, 'application/json')`.
-- [ ] **Harmonize Placeholder Path with Environment Variable (`src/components/settings/GeneralTab.tsx`)**:
+- [x] **Harmonize Placeholder Path with Environment Variable (`src/components/settings/GeneralTab.tsx`)**:
   - Replace the raw local path `placeholder="C:\Users\..."` in the storage directory input with `%USERPROFILE%\Documents\QuDaMemo\notes` in strict compliance with RULES.md.
 
 ### 2. ⌨️ Complete Unimplemented Keyboard Shortcuts
@@ -97,10 +88,10 @@
 
 ### 3. 📦 Clean Up Unused Crates & Dependencies
 
-- [ ] **Prune Unused Rust Crates (`src-tauri/Cargo.toml`)**:
+- [x] **Prune Unused Rust Crates (`src-tauri/Cargo.toml`)**:
   - `tauri-specta` / `specta-typescript`: Either implement the TypeScript export generation pipeline or remove these dependencies from `Cargo.toml`.
   - `log = "0.4"`: Unused across the Rust codebase; either wire native logging macros or remove.
-- [ ] **Remove Unused Frontend Dependencies (`package.json`)**:
+- [x] **Remove Unused Frontend Dependencies (`package.json`)**:
   - `dotenv`: Never imported in source code; prune from dependencies.
   - `motion`: Fully superseded by TailwindCSS animations and never imported; prune from dependencies.
 
@@ -115,7 +106,7 @@
 
 ### 5. 🛡️ Align Backend Storage Implementation with Specifications
 
-- [ ] **True Atomic Rename Memo Storage (`src-tauri/src/lib.rs`)**:
+- [x] **True Atomic Rename Memo Storage (`src-tauri/src/lib.rs`)**:
   - Refactor `save_memo_file_impl` from direct `fs::write` to writing to a temporary file before performing an atomic rename, matching architectural documentation.
 - [ ] **Refactor Empty Setup Closure (`src-tauri/src/lib.rs`)**:
   - Clean up `.setup(|_app| Ok(()))` or properly initialize directory/logging structures.

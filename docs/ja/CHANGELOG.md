@@ -4,6 +4,24 @@
 
 すべての重要な変更は本ドキュメントに記録されます。
 
+## [1.1.4] - 2026-11-20
+
+### 修正 (Fixed)
+- **Rust Frontmatter パーサーのブロック配列 `tags:` ＆ `summary_type` 対応 (`src-tauri/src/lib.rs`)**:
+  - `js-yaml` が出力する複数行ブロック形式の `tags:` が Rust 側読込時に空配列になっていた不具合を修正し、`summary_type` フィールド、CRLF 改行、本文内水平線 (`---`) 境界にも対応。
+- **環境変数パス展開 (`%USERPROFILE%` / `~`) ＆ パストラバーサル防御・真のアトミック書き込み**:
+  - Rust バックエンド側で `%USERPROFILE%` および `~` を実パスへ安全に展開し、不正な相対パス指定を遮断。メモおよび設定ファイルの保存を一時ファイル作成＋`sync_all()`＋`rename` のアトミック書き込みへ刷新。
+- **設定エクスポート不具合 ＆ プレースホルダー修正 (`BackupTab.tsx`, `dialog.ts`, `GeneralTab.tsx`)**:
+  - `exportFileWithDialog` の引数順序逆転を修正し、`save()` で選択された実パスへ `writeTextFile` で確実に書き込むよう改善。保存先入力欄のプレースホルダーも `%USERPROFILE%\Documents\QuDaMemo\notes` へ統一。
+
+### 改善 ＆ 整理 (Improved & Cleaned Up)
+- **依存クレート・パッケージの最新化と未使用依存の排除**:
+  - Rust の未使用クレート（`log`, `specta`, `specta-typescript`, `tauri-specta`）および Node.js の未使用パッケージ（`dotenv`, `motion`, `autoprefixer`）を削除し、`cc` クレートを `v1.11.2` へ更新。
+- **型安全性強化 ＆ CI/CD 補完**:
+  - `MemoEditor.tsx` / `AiTab.tsx` の `any` 排除（`GoogleGenAI` の `httpOptions.baseUrl` 指定を含む）、`App.tsx` のフック依存配列補完、および `.github/workflows/ci.yml` への `cargo test` ステップ追加を実施。
+- **日英ドキュメント全面同期**:
+  - `README.md` / `README_JA.md`、`ARCHITECTURE.md`、`TEST_REPORT.md`、`TODO.md` の記載と実測値を最新実装へ同期。
+
 ## [1.1.3] - 2026-10-27
 
 ### 変更 (Changed)

@@ -31,6 +31,13 @@
 - [x] Tauri v2 パッケージング・ビルド検証
 - [ ] バックグラウンド常駐タスクバーインジケーターのネイティブIPC検証
 
+### v1.1.4 リリース版 (2026-11-20)
+
+- [x] **Rust バックエンド堅牢化・Frontmatter パーサー強化 (`src-tauri/src/lib.rs`)**:
+  - ブロック配列 `tags:`・`summary_type`・CRLF/水平線対応、`%USERPROFILE%` / `~` 展開、パストラバーサル防御、真のアトミック書き込みを実装しテストを 7 件へ拡充。
+- [x] **フロントエンド不具合修正 ＆ 依存クリーンアップ**:
+  - `BackupTab.tsx` / `dialog.ts` の設定エクスポート不具合と `GeneralTab.tsx` のプレースホルダーを修正。未使用クレート・npm パッケージを削除し CI に `cargo test` を追加。
+
 ### v1.1.3 リリース版 (2026-10-27)
 
 - [x] **ソフトウェアライセンスの移行 (GPL-3.0-or-later)**:
@@ -58,31 +65,15 @@
 - [x] **Cargo 依存関係の整合性向上 (`Build / Cargo`)**:
   - `Cargo.lock` の `cc` クレートバージョンを更新し、Rust バックエンドビルドの安定性を強化。
 
-### v1.1.2 リリース版 (2026-10-27)
-
-- [x] **ドキュメント内パス環境変数化の徹底 (`Docs / Security`)**:
-  - 全ドキュメント内の設定ファイル・保存先パス記述を、RULES.md（環境変数化原則）に基づき `%USERPROFILE%\Documents\QuDaMemo\config.json` に統一。
-- [x] **README ドキュメントおよびライセンス表記の整備 (`Docs / Readme`)**:
-  - `README.md` および `README_JA.md` における機能概要・開発起動手順を復元し、LICENSEファイルへの詳細リンク表記を最適化。
-- [x] **ワークスペース開発ルールおよびスキルの拡充 (`Rules / Skills`)**:
-  - `RULES.md` および `GEMINI.md` に高速CLIツール（`ripgrep` / `fd` / `jq`）の標準利用原則を追記。
-  - Obsidian Vault 一時メモ自動保存スキル（`vault-memo`）を新規配備し、スキル一覧テーブルに登録。
-
-### v1.1.3 リリース版 (2026-10-27)
-
-- [x] **ソフトウェアライセンスの GPL-3.0-or-later 移行 (`License / Legal`)**:
-  - プロジェクトライセンスを MIT License から **GNU General Public License v3.0 or later (`GPL-3.0-or-later`)** へ移行。
-  - `LICENSE` ファイルを刷新し、`package.json`, `Cargo.toml`, `README.md`, `README_JA.md` のライセンス定義およびバッジ表示を同期更新。
-
 ---
 
 ## 🛠️ 修正するべき点・コード改善課題 (Fixes & Code Cleanup)
 
 ### 1. 🐛 ロジック不具合・引数逆転の修正
 
-- [ ] **設定エクスポート時の引数逆転バグの修正 (`src/components/settings/BackupTab.tsx`)**:
+- [x] **設定エクスポート時の引数逆転バグの修正 (`src/components/settings/BackupTab.tsx` / `src/utils/dialog.ts`)**:
   - `BackupTab.tsx` の 20 行目で `exportFileWithDialog(jsonStr, 'qudamemo_config.json', 'JSON (*.json)')` と引数の順序が逆転している不具合を修正。正しいシグネチャ `exportFileWithDialog('qudamemo_config.json', jsonStr, 'application/json')` に改める。
-- [ ] **設定画面プレースホルダーの生パス表記の環境変数化 (`src/components/settings/GeneralTab.tsx`)**:
+- [x] **設定画面プレースホルダーの生パス表記の環境変数化 (`src/components/settings/GeneralTab.tsx`)**:
   - 保存先フォルダの入力プレースホルダー `placeholder="C:\Users\..."` を、RULES.md に準拠して `%USERPROFILE%\Documents\QuDaMemo\notes` へ修正。
 
 ### 2. ⌨️ 未実装キーボードショートカットの実装補完
@@ -97,10 +88,10 @@
 
 ### 3. 📦 未使用クレート・依存パッケージの整理・クリーンアップ
 
-- [ ] **Rust 側未使用クレートの整理 (`src-tauri/Cargo.toml`)**:
+- [x] **Rust 側未使用クレートの整理 (`src-tauri/Cargo.toml`)**:
   - `tauri-specta` / `specta-typescript`: TypeScript 自動生成ビルダーを実装するか、使用していない場合は `Cargo.toml` から削除。
   - `log = "0.4"`: コード内で一度も使用されていないため、Rust 側の内部ログ出力マクロを実装するか削除。
-- [ ] **フロントエンド側未使用依存関係の削除 (`package.json`)**:
+- [x] **フロントエンド側未使用依存関係の削除 (`package.json`)**:
   - `dotenv`: ソースコード内で一度もインポートされていないため削除。
   - `motion`: TailwindCSS アニメーションで代替されておりインポートされていないため削除。
 
@@ -115,7 +106,7 @@
 
 ### 5. 🛡️ バックエンド保存ロジックの整合性向上
 
-- [ ] **メモ保存のアトミックリネーム化 (`src-tauri/src/lib.rs`)**:
+- [x] **メモ保存のアトミックリネーム化 (`src-tauri/src/lib.rs`)**:
   - `save_memo_file_impl` を直接 `fs::write` する実装から、一時ファイル作成後にアトミックリネームする真のアトミック保存ロジックへ刷新（ドキュメント仕様との完全一致）。
 - [ ] **空セットアップクロージャの整理 (`src-tauri/src/lib.rs`)**:
   - `.setup(|_app| Ok(()))` の空クロージャを整理または初期化処理（ログ・フォルダ準備等）を明確化。

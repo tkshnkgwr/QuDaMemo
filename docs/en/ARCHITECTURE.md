@@ -19,7 +19,7 @@ flowchart TD
         LogViewer["LogViewer / Modal (Real-time log inspection)"]
     end
 
-    subgraph IPC ["Tauri v2 IPC Bridge (Type-Safe Specta)"]
+    subgraph IPC ["Tauri v2 IPC Bridge (Serde JSON)"]
         direction TB
         Invoke["invoke / Commands Communication"]
     end
@@ -53,7 +53,7 @@ QuDaMemo is organized into 4 logical architectural layers:
 | :------------------ | :---------------------------- | :--------------------------------------------------------------------- |
 | **Presentation**    | React 19, TailwindCSS, Lucide | Fast UI rendering, editor, calendar view, theme & modal control        |
 | **State & Sync**    | TypeScript, LocalStorage      | UI state, temporary caching, frontmatter conversion, AI async requests |
-| **Tauri IPC Bridge**| Tauri v2, Specta, Serde       | Type-safe IPC, asynchronous serialization, native OS event handling    |
+| **Tauri IPC Bridge**| Tauri v2, Serde JSON          | Type-safe IPC, asynchronous serialization, native OS event handling    |
 | **Native Core**     | Rust 1.80+, std::fs, Tempfile | Atomic file writes, fast Markdown parsing, config persistence, logs    |
 
 - **UI / Frontend (React 19 / TypeScript)**:

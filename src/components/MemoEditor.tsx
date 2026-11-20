@@ -11,8 +11,8 @@ import { logger } from '../utils/logger';
 // CORS制限をバイパスして安全にWeb/プロキシ通信を行うヘルパー
 async function safeFetch(url: string, options?: RequestInit): Promise<Response> {
   try {
-    return await tauriFetch(url, options as any);
-  } catch (err) {
+    return await tauriFetch(url, options as Parameters<typeof tauriFetch>[1]);
+  } catch {
     return await window.fetch(url, options);
   }
 }
@@ -219,11 +219,13 @@ export const MemoEditor: React.FC<MemoEditorProps> = ({
 
         let generatedText = '';
         try {
-          const aiOptions: Record<string, unknown> = { apiKey };
-          if (cleanBaseUrl !== 'https://generativelanguage.googleapis.com') {
-            aiOptions.baseUrl = cleanBaseUrl;
-          }
-          const ai = new GoogleGenAI(aiOptions as any);
+          const aiOptions: ConstructorParameters<typeof GoogleGenAI>[0] = {
+            apiKey,
+            ...(cleanBaseUrl !== 'https://generativelanguage.googleapis.com'
+              ? { httpOptions: { baseUrl: cleanBaseUrl } }
+              : {}),
+          };
+          const ai = new GoogleGenAI(aiOptions);
           const response = await ai.models.generateContent({
             model: modelName,
             contents: `${customPrompt}\n\n【対象メモ本文】\n${textToSummarize}`,
@@ -242,7 +244,8 @@ export const MemoEditor: React.FC<MemoEditorProps> = ({
           throw new Error('Gemini API returned empty text');
         }
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : '通信エラー';
       logger.error('AI要約処理エラー発生', e);
       if (mode === 'local_fallback') {
         finalSummary = generateFallbackSummary(textToSummarize, memo.date);
@@ -250,7 +253,7 @@ export const MemoEditor: React.FC<MemoEditorProps> = ({
         setSummaryType('local-fallback');
       } else {
         // ユーザーが選択したモード(Web-Proxy / API)でエラーが起きた場合は、勝手にローカル要約にすり替えずエラー理由を明記
-        finalSummary = `（要約失敗: ${e?.message || '通信エラー'}）`;
+        finalSummary = `（要約失敗: ${errorMessage}）`;
         finalSummaryType = mode === 'web_proxy' ? `${modelName} (Web-Proxy Error)` : `${modelName} (API Error)`;
         setSummaryType(finalSummaryType);
       }

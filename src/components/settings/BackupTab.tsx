@@ -17,7 +17,11 @@ export const BackupTab: React.FC<BackupTabProps> = ({ formData, setFormData, set
   // 設定エクスポート
   const handleExportConfig = async () => {
     const jsonStr = JSON.stringify(formData, null, 2);
-    const success = await exportFileWithDialog(jsonStr, 'qudamemo_config.json', 'JSON (*.json)');
+    const success = await exportFileWithDialog(
+      'qudamemo_config.json',
+      jsonStr,
+      'application/json;charset=utf-8;'
+    );
     if (success) {
       setStatusMessage('設定ファイルを正常にエクスポートしました');
       setTimeout(() => setStatusMessage(null), 3000);
